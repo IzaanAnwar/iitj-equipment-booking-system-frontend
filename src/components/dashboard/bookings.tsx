@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useState } from 'react';
 import { Calendar } from '../ui/calendar';
 import { useRouter } from 'next/navigation';
-import { events } from '@/app/(protected)/dashboard/[equipmentId]/page';
 import { Input } from '../ui/input';
 import { Maintainance } from './maintainance';
 
@@ -400,7 +399,7 @@ export const equipmentData: IEquipment[] = [
 export function BookingsPage() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment>();
+  const [selectedEquipment, setSelectedEquipment] = useState<IEquipment>();
 
   return (
     <main className="space-y-6">
@@ -459,7 +458,7 @@ export function BookingsPage() {
   );
 }
 
-function EquipmentCard({ equipment }: { equipment: Equipment }) {
+function EquipmentCard({ equipment }: { equipment: IEquipment }) {
   const router = useRouter();
 
   const [date, setDate] = useState<Date | undefined>(new Date());
