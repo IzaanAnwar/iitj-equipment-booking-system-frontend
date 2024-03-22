@@ -30,6 +30,7 @@ import Image from 'next/image';
 import { User } from '../../../types';
 import { useSignOut } from '@/hooks/use-logout';
 import Link from 'next/link';
+import { Label } from '@radix-ui/react-label';
 
 export function Navbar({ user }: { user: User | null }) {
   const [toasted, setToasted] = useState(false);
@@ -73,9 +74,12 @@ export function Navbar({ user }: { user: User | null }) {
               Account
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 p-4">
+          <DropdownMenuContent className="w-56 space-y-3 p-4">
             <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <Label className=" p-2">
+              <strong>Credits</strong> ₹ 10000
+            </Label>
             <Button
               onClick={() => {
                 setToasted(false);

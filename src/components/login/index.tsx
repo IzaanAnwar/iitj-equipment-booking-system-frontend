@@ -26,14 +26,41 @@ export function LoginCard() {
   const useLogin = useMutation({
     mutationKey: ['login'],
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const res = await api.post('/signin', {
-        email,
-        password,
-      });
+      // const res = await api.post('/signin', {
+      //   email,
+      //   password,
+      // });
+      if (email === 'user@email.com' && password === 'test123') {
+        Cookies.set('role', 'user');
+        return {
+          user: {
+            userId: 'e6d90d5e-5bd8-4bce-91a7-1f16e9351519',
+            role: 'user',
+            supervisorId: null,
+            name: 'Izaan',
+            iat: 1711138106,
+            exp: 1711224506,
+          },
+        };
+      } else if (email === 'admin@email.com' && password === 'test123') {
+        Cookies.set('role', 'admin');
 
-      console.log({ res });
+        return {
+          user: {
+            userId: '285b4906-1368-40a0-bfb0-c01f58d3accb',
+            role: 'admin',
+            supervisorId: null,
+            name: 'Rahul',
+            iat: 1711138275,
+            exp: 1711224675,
+          },
+        };
+      } else {
+        throw new Error('Something went wrong');
+      }
+      // console.log({ res });
 
-      return await res.data;
+      // return await res.data;
     },
   });
   if (useLogin.isError && !toasted) {
@@ -46,7 +73,7 @@ export function LoginCard() {
     setToasted(true);
   }
   if (useLogin.isSuccess) {
-    Cookies.set('access_token', `Bearer ${useLogin.data.token}`);
+    // Cookies.set('access_token', useLogin.data.access_token);
     router.push('/dashboard');
   }
 
@@ -102,6 +129,7 @@ export function LoginCard() {
                 setToasted(true);
                 return;
               }
+
               useLogin.mutate({ email: userEmail, password: userPassword });
             }}
           >

@@ -18,7 +18,7 @@ import { api } from '@/utils/axios-instance';
 import { Equipment, User } from '../../../types';
 import { Skeleton } from '../ui/skeleton';
 import { toast } from '../ui/use-toast';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { getSession } from '@/actions/get-session';
 import { IEquipment, equipmentData } from './bookings';
@@ -85,11 +85,11 @@ export const columns: ColumnDef<IEquipment>[] = [
     },
   },
   {
-    accessorKey: 'place',
+    accessorKey: 'location',
     header: 'Place',
   },
   {
-    accessorKey: 'tokens',
+    accessorKey: 'token',
     header: 'Tokens',
   },
 
@@ -122,37 +122,43 @@ export const columns: ColumnDef<IEquipment>[] = [
 ];
 
 export function EquipmentList({ user }: { user: User }) {
-  const [toasted, setToasted] = useState(false);
-  const useGetEquipments = useQuery({
-    queryKey: ['get-all-equipments'],
-    queryFn: async () => {
-      const res = await api.get('/equipments');
-      if (res.status !== 200) {
-        throw new Error('Server Error please try after some time');
-      }
-      console.log({ data: await res.data });
+  const [toasted, setToasted] = useState(true);
+  // const useGetEquipments = useQuery({
+  //   queryKey: ['get-all-equipments'],
+  //   queryFn: async () => {
+  //     const res = await api.get('/equipments');
+  //     if (res.status !== 200) {
+  //       throw new Error('Server Error please try after some time');
+  //     }
+  //     console.log({ data: await res.data });
 
-      return (await res.data.equipments) as Equipment[];
-    },
-  });
-  if (useGetEquipments.isPending) {
+  //     return (await res.data.equipments) as Equipment[];
+  //   },
+  // });
+
+  // if (useGetEquipments.isError && !toasted) {
+  //   toast({
+  //     title: 'Server error',
+  //     variant: 'destructive',
+  //   });
+  //   setToasted(true);
+  // }
+  // console.log({ tableDAta: useGetEquipments.data });
+  useEffect(() => {
+    setTimeout(() => {
+      setToasted(false);
+    }, 1000);
+  }, []);
+  if (toasted) {
     return (
       <div className="flex h-full w-full  items-center justify-center  ">
         <Loader2 className="animate-spin" />
       </div>
     );
   }
-  if (useGetEquipments.isError && !toasted) {
-    toast({
-      title: 'Server error',
-      variant: 'destructive',
-    });
-    setToasted(true);
-  }
-  console.log({ tableDAta: useGetEquipments.data });
-
-  if (useGetEquipments.data) {
-    return (
+  // if (useGetEquipments.data) {
+  return (
+    <>
       <DataTable
         columns={columns}
         data={equipmentData}
@@ -161,6 +167,7 @@ export function EquipmentList({ user }: { user: User }) {
           { val: 'status', type: 'text' },
         ]}
       />
-    );
-  }
+    </>
+  );
+  // }
 }
