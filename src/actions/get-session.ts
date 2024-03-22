@@ -30,7 +30,7 @@ export async function getSession() {
       role: 'user',
       supervisorId: null,
       name: 'Izaan',
-    };
+    } as User;
   } else return null;
   // console.log({mytokrn:token});
 
