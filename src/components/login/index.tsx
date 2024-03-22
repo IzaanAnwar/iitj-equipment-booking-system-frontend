@@ -46,7 +46,7 @@ export function LoginCard() {
     setToasted(true);
   }
   if (useLogin.isSuccess) {
-    Cookies.set('access_token', `Bearer ${useLogin.data.access_token}`);
+    Cookies.set('access_token', `Bearer ${useLogin.data.token}`);
     router.push('/dashboard');
   }
 
