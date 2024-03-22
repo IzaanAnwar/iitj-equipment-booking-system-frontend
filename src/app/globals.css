@@ -57,3 +57,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+.rbc-time-content .rbc-time-gutter  {
+  background-color: white !important;
+}
+.rbc-time-gutter .rbc-label{
+  width: 100%;
+  height: 100%;
+  color: white; 
+  /* background-color: whitesmoke; */
+}
+
+.rbc-timeslot-group  {
+  background-color: rgb(13, 172, 13)
+}
+ 
+.rbc-day-slot .rbc-time-slot {
+  border-top: none !important;
+}
+
+.rbc-slot-selection {
+  background-color: #0568c1 !important; 
+}

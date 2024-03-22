@@ -26,30 +26,20 @@ import { toast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
+import Image from 'next/image';
+import { User } from '../../../types';
+import { useSignOut } from '@/hooks/use-logout';
+import Link from 'next/link';
 
-export function Navbar() {
+export function Navbar({ user }: { user: User | null }) {
   const [toasted, setToasted] = useState(false);
   const isDesktop = useMediaQuery('(min-width:768px');
   const router = useRouter();
-  const useSignOut = useMutation({
-    mutationKey: ['signout'],
-    mutationFn: async () => {
-      try {
-        const res = await api.post('/signout');
-        console.log({ res });
-
-        if (res.status !== 200) {
-          throw new Error('Something went wrong');
-        }
-      } catch (error) {
-        console.error({ error });
-      }
-    },
-  });
-  if (useSignOut.isSuccess) {
+  const signOut = useSignOut();
+  if (signOut.isSuccess) {
     router.push('/');
   }
-  if (useSignOut.isSuccess && !toasted) {
+  if (signOut.isError && !toasted) {
     toast({
       title: 'Error',
       description: 'Could not log you out',
@@ -59,33 +49,47 @@ export function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between border-b-2 bg-background px-2 py-2 md:px-16 lg:px-32">
-      <div>IIT</div>
+    <nav className="sticky top-0 z-50 flex items-center justify-between border-b-2 border-gray-300  bg-primary px-2 py-2 text-primary-foreground md:px-16">
+      <div className="flex items-center justify-start gap-4">
+        <Image src="/logo1.gif" alt="crdsi logo" width={48} height={48} />
+        <p className="text-xl font-semibold">CDRSI</p>
+      </div>
       <div className="flex items-center justify-end gap-2">
+        {user?.role === 'user' && (
+          <>
+            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+              <Link className="h-full w-full" href="/dashboard">
+                Home
+              </Link>
+            </Button>
+            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+              Bookings
+            </Button>
+          </>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Avatar>
-              <AvatarImage src="/domr" />
-              <AvatarFallback>NA</AvatarFallback>
-            </Avatar>
+            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+              Account
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 p-4">
-            <DropdownMenuLabel>User</DropdownMenuLabel>
+            <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <Button
               onClick={() => {
                 setToasted(false);
-                useSignOut.mutate();
+                signOut.mutate();
               }}
-              loading={useSignOut.isPending}
-              disabled={useSignOut.isPending}
+              loading={signOut.isPending}
+              disabled={signOut.isPending}
             >
               Signout
             </Button>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {!isDesktop && (
+        {!isDesktop && user?.role !== 'user' && (
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size={'icon'}>

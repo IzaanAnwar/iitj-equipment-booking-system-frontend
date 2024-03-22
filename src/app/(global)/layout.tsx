@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <TanstackQueryClientProvider>
           <>
-            <NextTopLoader />
+            <NextTopLoader color="#ff9000" />
             {children}
             <Toaster />
           </>

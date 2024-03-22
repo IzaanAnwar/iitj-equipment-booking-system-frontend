@@ -37,9 +37,9 @@ export default async function middleware(req: NextRequest) {
   //     }
   //   }
 
-  if (!isLoggedIn && currUrl !== '/') {
-    return NextResponse.redirect(new URL(`/`, nextUrl));
-  }
+  // if (!isLoggedIn && currUrl !== '/') {
+  //   return NextResponse.redirect(new URL(`/`, nextUrl));
+  // }
 
   return null;
 }

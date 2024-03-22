@@ -12,13 +12,18 @@ import {
 
 import { usePathname } from 'next/navigation';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { User } from '../../../types';
 
-export function Sidebar() {
+export function Sidebar({ user }: { user: User | null }) {
+  console.log({ user });
+
   const isDesktop = useMediaQuery('(min-width:768px');
-  if (isDesktop) {
+  if (isDesktop && user?.role !== 'user') {
     return (
-      <nav className="sticky  left-0  top-0 min-h-screen border-r-2 md:w-[20%]">
-        <h1 className="w-full border-b-2 px-4 py-3 text-2xl font-bold text-primary">EBS</h1>
+      <nav className="sticky  left-0  top-0 min-h-screen border-r-2 border-gray-300 md:w-[20%]">
+        <h1 className="w-full border-b-2 bg-primary px-4 py-5 text-xl font-bold text-primary-foreground">
+          Equipment Booking
+        </h1>
         <SideBarContent />
       </nav>
     );

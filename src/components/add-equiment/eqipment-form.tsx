@@ -24,31 +24,7 @@ import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useState } from 'react';
 import { api } from '@/utils/axios-instance';
-import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
-import { Calendar } from '../ui/calendar';
-
-type Checked = DropdownMenuCheckboxItemProps['checked'];
-type WeekDay = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const TIME = [
-  '09:00',
-  '10:00',
-  '11:00',
-  '12:00',
-  '13:00',
-  '14:00',
-  '15:00',
-  '16:00',
-  '17:00',
-  '18:00',
-  '19:00',
-  '20:00',
-  '21:00',
-  '22:00',
-  // '23:00',
-  // '24:00',
-];
 
 const equipmentFormSchema = z.object({
   name: z.string().min(2, {
@@ -61,8 +37,8 @@ const equipmentFormSchema = z.object({
     .min(16, {
       message: 'Name must be at least 16 characters.',
     }),
-  quantity: z.string(),
   cost: z.string(),
+  place: z.string(),
   availablity: z.string(),
 });
 
@@ -100,7 +76,6 @@ export function EquipmentForm() {
       const res = await api.post('/equipments/add', {
         name: data.name,
         description: data.description,
-        quantity: Number(data.quantity),
         cost: Number(data.cost),
       });
       if (res.status === 201) {
@@ -174,14 +149,28 @@ export function EquipmentForm() {
         />
         <FormField
           control={form.control}
+          name="place"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Place</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Location of Lab" className="resize-none" {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="cost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Booking Cost</FormLabel>
+              <FormLabel>Consumable Charges per slot/sample</FormLabel>
               <FormControl>
                 <Input type="number" placeholder="eg: 1" {...field} />
               </FormControl>
-              <FormDescription>Input the number of tokens that are required to book this equipment</FormDescription>
+              <FormDescription>Input the consumable Charges that are required to book this equipment</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -189,27 +178,13 @@ export function EquipmentForm() {
 
         <FormField
           control={form.control}
-          name="quantity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quantity</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="eg: 1" {...field} />
-              </FormControl>
-              <FormDescription>Number of equipments that will be avaialble for booking</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="availablity"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Availablity</FormLabel>
+              <FormLabel>Hour/Slot</FormLabel>
               <FormControl>
-                <div className="w-full items-center justify-between gap-4 space-y-2 md:flex md:space-y-0">
-                  <DropdownMenu open={closeWeekSelector}>
+                {/* <div className="w-full items-center justify-between gap-4 space-y-2 md:flex md:space-y-0"> */}
+                {/* <DropdownMenu open={closeWeekSelector}>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="w-full" onClick={() => setCloseWeekSelector(true)}>
                         Select Days
@@ -250,31 +225,46 @@ export function EquipmentForm() {
                         </Button>
                       </div>
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu> */}
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Equipment slot" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Select Equipment slot</SelectLabel>
+                      <SelectItem value={'60'}>1 hr</SelectItem>
+                      <SelectItem value={'120'}>2 hr</SelectItem>
+                      <SelectItem value={'180'}>3 hr</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
 
-                  <TimePicker.RangePicker
-                    format={'hh-mm'}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
+                {/* </div> */}
               </FormControl>
-              {Number(form.getValues().quantity) > 1 && (
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="eq-availablity" />
-                  <label
-                    htmlFor="eq-availablity"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Same for all equipments
-                  </label>
-                </div>
-              )}
-              <FormDescription>Select When the Equipments will be available</FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="availablity"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Lab Hours</FormLabel>
+              <FormControl>
+                <TimePicker.RangePicker
+                  format={'hh-mm'}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </FormControl>
 
+              <FormDescription>Select Lab Hours (Monday to Friday)</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button
           type="submit"
           className="w-full"

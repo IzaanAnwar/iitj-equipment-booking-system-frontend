@@ -21,8 +21,10 @@ import { toast } from '../ui/use-toast';
 import { useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { getSession } from '@/actions/get-session';
+import { IEquipment, equipmentData } from './bookings';
+import { Badge } from '../ui/badge';
 
-export const columns: ColumnDef<Equipment>[] = [
+export const columns: ColumnDef<IEquipment>[] = [
   //   {
   //     id: 'select',
   //     header: ({ table }) => (
@@ -76,10 +78,15 @@ export const columns: ColumnDef<Equipment>[] = [
   {
     accessorKey: 'status',
     header: 'Status',
+    cell: ({ cell }) => {
+      const data = cell.getValue() as string;
+
+      return <Badge variant={data === 'active' ? 'outline' : 'warning'}>{data}</Badge>;
+    },
   },
   {
-    accessorKey: 'quantity',
-    header: 'Quantity',
+    accessorKey: 'place',
+    header: 'Place',
   },
   {
     accessorKey: 'tokens',
@@ -103,12 +110,10 @@ export const columns: ColumnDef<Equipment>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>
-              Copy payment ID
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>Edit</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem>Update</DropdownMenuItem>
+            {/* <DropdownMenuItem>View payment details</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -150,7 +155,7 @@ export function EquipmentList({ user }: { user: User }) {
     return (
       <DataTable
         columns={columns}
-        data={useGetEquipments.data}
+        data={equipmentData}
         filters={[
           { val: 'name', type: 'text' },
           { val: 'status', type: 'text' },

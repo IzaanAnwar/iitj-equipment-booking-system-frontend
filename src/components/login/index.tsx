@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 import { toast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { api } from '@/utils/axios-instance';
+import Image from 'next/image';
 
 export function LoginCard() {
   const router = useRouter();
@@ -49,41 +50,72 @@ export function LoginCard() {
   }
 
   return (
-    <Card className="w-full space-y-3 px-8 py-4 md:max-w-[75%] lg:max-w-[40%] ">
-      <CardTitle className="text-2xl font-bold">Login</CardTitle>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input value={userEmail} type="email" name="email" onChange={(e) => setUserEmail(e.target.value)} />
+    <Card className="w-full space-y-3 px-8 py-4 md:max-w-[80%] lg:max-w-[70%] ">
+      <CardContent className="grid grid-cols-1 gap-12 md:grid-cols-2">
+        <div className="order-2 col-span-1 space-y-6 md:order-1">
+          <CardTitle className="text-center text-3xl font-bold">Login</CardTitle>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input value={userEmail} type="email" name="email" onChange={(e) => setUserEmail(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              value={userPassword}
+              type="password"
+              name="password"
+              onChange={(e) => setUserPassword(e.target.value)}
+            />
+          </div>
+          <Button
+            loading={useLogin.isPending}
+            disabled={useLogin.isPending}
+            className="w-full "
+            type="submit"
+            // onKeyDown={(e) => {
+            //   console.log(e);
+
+            //   if (e.key !== 'Enter') {
+            //     return;
+            //   }
+            //   setToasted(false);
+            //   if (!userEmail || !userPassword) {
+            //     toast({
+            //       title: 'Missing Field',
+            //       variant: 'destructive',
+            //     });
+            //     setToasted(true);
+            //     return;
+            //   }
+            //   useLogin.mutate({ email: userEmail, password: userPassword });
+            // }}
+            onClick={() => {
+              console.log('I am clicked');
+
+              setToasted(false);
+              if (!userEmail || !userPassword) {
+                toast({
+                  title: 'Missing Field',
+                  variant: 'destructive',
+                });
+                setToasted(true);
+                return;
+              }
+              useLogin.mutate({ email: userEmail, password: userPassword });
+            }}
+          >
+            Login
+          </Button>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            value={userPassword}
-            type="password"
-            name="password"
-            onChange={(e) => setUserPassword(e.target.value)}
+        <div className="order-1 col-span-1 max-h-full  overflow-clip md:order-2">
+          <Image
+            src="/login-page.jpg"
+            alt="Equipment Vector"
+            width={1080}
+            height={720}
+            className="h-full w-full object-cover"
           />
         </div>
-        <Button
-          loading={useLogin.isPending}
-          disabled={useLogin.isPending}
-          className="w-full "
-          onClick={() => {
-            setToasted(false);
-            if (!userEmail || !userPassword) {
-              toast({
-                title: 'Missing Field',
-                variant: 'destructive',
-              });
-              setToasted(true);
-              return;
-            }
-            useLogin.mutate({ email: userEmail, password: userPassword });
-          }}
-        >
-          Login
-        </Button>
       </CardContent>
     </Card>
   );
