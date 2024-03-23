@@ -35,7 +35,7 @@ export function SideBarContent() {
   return (
     <div className="mt-12 space-y-4 px-4">
       <div>
-        <Button className="w-full" variant={pathName === '/dashboard' ? 'default' : 'outline'}>
+        <Button className="w-full" variant={pathName.includes('/dashboard') ? 'default' : 'outline'}>
           <Link href="/dashboard" className="flex h-full w-full items-center justify-start gap-2">
             <LayoutDashboardIcon /> <p>Dashboard</p>
           </Link>
