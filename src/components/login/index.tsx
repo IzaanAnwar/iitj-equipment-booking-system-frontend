@@ -56,7 +56,7 @@ export function LoginCard() {
           },
         };
       } else {
-        throw new Error('Something went wrong');
+        throw new Error('Invalid Credentials');
       }
       // console.log({ res });
 

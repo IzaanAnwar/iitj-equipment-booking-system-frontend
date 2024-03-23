@@ -64,6 +64,11 @@ export function Navbar({ user }: { user: User | null }) {
               </Link>
             </Button>
             <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+              <Link className="h-full w-full" href="/instructions">
+                Instructions
+              </Link>
+            </Button>
+            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
               Bookings
             </Button>
           </>
