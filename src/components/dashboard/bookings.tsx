@@ -26,6 +26,7 @@ export interface IEquipment {
   phoneNo: string;
   slot: string;
   token: string;
+  reason?: string;
 }
 interface Slot {
   startTime: Date | string;
@@ -48,6 +49,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '(91 291) 280 1305',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '2',
@@ -63,6 +66,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801311',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '3',
@@ -78,6 +83,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '(91 291) 280 1305',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '4',
@@ -93,6 +100,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801311',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '5',
@@ -108,6 +117,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280 1210',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '6',
@@ -123,6 +134,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280 1311',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '7',
@@ -138,6 +151,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280 1313',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '8',
@@ -153,6 +168,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280-1213',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
 
   {
@@ -169,6 +186,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801610',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '10',
@@ -184,6 +203,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280 1556',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '11',
@@ -199,6 +220,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801314',
     slot: '2',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '12',
@@ -214,6 +237,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801314',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '13',
@@ -229,6 +254,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801506',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '14',
@@ -244,6 +271,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801309',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '15',
@@ -259,6 +288,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280 1556',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '16',
@@ -274,6 +305,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280-1213',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '17',
@@ -289,6 +322,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 280 1506',
     slot: '2',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '18',
@@ -304,6 +339,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801308',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '19',
@@ -319,6 +356,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801308',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '20',
@@ -334,6 +373,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801610',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '21',
@@ -349,6 +390,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '0291 2801610',
     slot: '2',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '22',
@@ -364,6 +407,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '(91 291) 2801206',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '23',
@@ -379,6 +424,8 @@ export const equipmentData: IEquipment[] = [
     phoneNo: '(91 291) 2801206',
     slot: '3',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
   {
     id: '24',
@@ -394,6 +441,8 @@ export const equipmentData: IEquipment[] = [
     status: 'maintenance',
     slot: '1',
     token: '500',
+    reason:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sit amet porttitor eget dolor morbi non arcu risus quis. Risus at ultrices mi tempus imperdiet nulla.',
   },
 ];
 export function BookingsPage() {

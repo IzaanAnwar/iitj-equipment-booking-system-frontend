@@ -23,6 +23,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { getSession } from '@/actions/get-session';
 import { IEquipment, equipmentData } from './bookings';
 import { Badge } from '../ui/badge';
+import Link from 'next/link';
 
 export const columns: ColumnDef<IEquipment>[] = [
   //   {
@@ -97,7 +98,9 @@ export const columns: ColumnDef<IEquipment>[] = [
     id: 'actions',
     accessorKey: 'action',
     header: () => <div className="text-center">Action</div>,
-    cell: ({ row }) => {
+    cell: ({ row, cell }) => {
+      console.log({ row, cell });
+
       const payment = row.original;
 
       return (
@@ -112,7 +115,9 @@ export const columns: ColumnDef<IEquipment>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>Edit</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Update</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`/dashboard/update-equipment/${row.original.id}`}>Update Status</Link>
+            </DropdownMenuItem>
             {/* <DropdownMenuItem>View payment details</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
