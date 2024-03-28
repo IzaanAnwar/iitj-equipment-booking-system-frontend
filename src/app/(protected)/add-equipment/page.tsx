@@ -1,4 +1,4 @@
-import { EquipmentForm } from '@/components/add-equiment/eqipment-form';
+import { EquipmentForm } from '@/components/add-equiment/equipment-form';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
 export default async function AddEquipment() {

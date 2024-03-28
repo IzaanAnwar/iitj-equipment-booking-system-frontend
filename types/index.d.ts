@@ -1,11 +1,33 @@
-export type Equipment = {
+export type Slot = {
+  startTime: string;
+  endTime: string;
   id: string;
-  name: string;
-  status: 'available' | 'booked' | 'maintenance' | null;
-  description: string;
-  quantity: number;
-  tokens: number | null;
+  equipmentId: string;
+  slotType: 'DAY' | 'EVENING' | 'NIGHT';
 };
+
+export type Equipment = {
+  name: string;
+  description: string;
+  place: string;
+  status: 'active' | 'maintenance';
+  id: string;
+  slotDuration: number;
+  tokens: number;
+  slots: Slot[];
+};
+
+export type MaintenanceLog = {
+  startTime: string;
+  endTime: string;
+  id: number;
+  equipmentId: string;
+  reason: string;
+};
+
+export interface EquipmentWithMaintenanceLogs extends Equipment {
+  maintenanceLog?: MaintenanceLog;
+}
 
 export type Student = {
   id: string;
@@ -27,3 +49,21 @@ export type User = {
   iat: string;
   exp: string;
 };
+
+export interface IEvent {
+  equipmentId: string;
+  slotDuration: Date;
+  userId: string;
+  id: number;
+  startDatetime: Date;
+  endDatetime: Date;
+  bookedAt: Date | null;
+  start: unknown;
+  end: unknown;
+  equipment: {
+    slotDuration: number;
+    name: string;
+    description: string;
+    tokens: number;
+  };
+}

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 import {
   ClipboardIcon,
+  GraduationCapIcon,
   LayoutDashboardIcon,
   ListPlusIcon,
   SquareUserRoundIcon,
@@ -24,13 +25,13 @@ export function Sidebar({ user }: { user: User | null }) {
         <h1 className="w-full border-b-2 bg-primary px-4 py-5 text-xl font-bold text-primary-foreground">
           Equipment Booking
         </h1>
-        <SideBarContent />
+        <SideBarContent user={user} />
       </nav>
     );
   }
 }
 
-export function SideBarContent() {
+export function SideBarContent({ user }: { user: User | null }) {
   const pathName = usePathname();
   return (
     <div className="mt-12 space-y-4 px-4">
@@ -57,19 +58,22 @@ export function SideBarContent() {
         </Button>
       </div>
       <div>
-        <Button className="w-full" variant={pathName === '/add-student' ? 'default' : 'outline'}>
-          <Link href="/add-student" className="flex h-full w-full items-center justify-start gap-2">
-            <UserPlus2Icon /> <p>Add student</p>
+        <Button className="w-full" variant={pathName === '/add-user' ? 'default' : 'outline'}>
+          <Link href="/add-user" className="flex h-full w-full items-center justify-start gap-2">
+            <UserPlus2Icon /> <p>Add User</p>
           </Link>
         </Button>
       </div>
-      <div>
-        <Button className="w-full" variant={pathName === '/add-equipment' ? 'default' : 'outline'}>
-          <Link href="/add-equipment" className="flex h-full w-full items-center justify-start gap-2">
-            <ListPlusIcon /> <p>Add Equipment</p>
-          </Link>
-        </Button>
-      </div>
+
+      {user?.role === 'admin' && (
+        <div>
+          <Button className="w-full" variant={pathName === '/add-equipment' ? 'default' : 'outline'}>
+            <Link href="/add-equipment" className="flex h-full w-full items-center justify-start gap-2">
+              <ListPlusIcon /> <p>Add Equipment</p>
+            </Link>
+          </Button>
+        </div>
+      )}
       <div>
         <Button className="w-full" variant={pathName === '/account' ? 'default' : 'outline'}>
           <Link href="/account" className="flex h-full w-full items-center justify-start gap-2">

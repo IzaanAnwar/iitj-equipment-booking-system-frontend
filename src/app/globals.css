@@ -58,7 +58,7 @@
   }
 }
 
-.rbc-time-content .rbc-time-gutter  {
+/* .rbc-time-content .rbc-time-gutter  {
   background-color: white !important;
 }
 .rbc-time-gutter .rbc-label{
@@ -66,11 +66,11 @@
   height: 100%;
   color: white; 
   /* background-color: whitesmoke; */
-}
+
 
 .rbc-timeslot-group  {
-  background-color: rgb(13, 172, 13)
-}
+  background-color: rgb(245, 245, 245)
+} 
  
 .rbc-day-slot .rbc-time-slot {
   border-top: none !important;
@@ -78,4 +78,32 @@
 
 .rbc-slot-selection {
   background-color: #0568c1 !important; 
+}
+
+ .ant-picker-ok .ant-btn {
+  background-color: #2563eb;
+  color: white;
+}
+
+rbc-header future-date {
+  background-color: white;
+}
+
+.future-date .rbc-timeslot-group {
+  background-color: rgb(43, 213, 100) !important;
+}
+
+.rbc-time-view {
+  border-radius: 4px;
+}
+
+
+.rbc-time-header {
+  background-color: rgb(231, 231, 231) !important;
+}
+
+
+.rbc-active {
+  background-color: #2563eb !important;
+  color: white !important;
 }

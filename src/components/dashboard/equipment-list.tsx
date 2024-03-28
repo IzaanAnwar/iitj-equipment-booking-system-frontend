@@ -18,33 +18,13 @@ import { api } from '@/utils/axios-instance';
 import { Equipment, User } from '../../../types';
 import { Skeleton } from '../ui/skeleton';
 import { toast } from '../ui/use-toast';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { getSession } from '@/actions/get-session';
-import { IEquipment, equipmentData } from './bookings';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
+import { useGetEquipments } from '@/hooks/use-get-equipments';
 
-export const columns: ColumnDef<IEquipment>[] = [
-  //   {
-  //     id: 'select',
-  //     header: ({ table }) => (
-  //       <Checkbox
-  //         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-  //         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //         aria-label="Select all"
-  //       />
-  //     ),
-  //     cell: ({ row }) => (
-  //       <Checkbox
-  //         checked={row.getIsSelected()}
-  //         onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //         aria-label="Select row"
-  //       />
-  //     ),
-  //     enableSorting: false,
-  //     enableHiding: false,
-  //   },
+export const columns: ColumnDef<Equipment>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -54,6 +34,11 @@ export const columns: ColumnDef<IEquipment>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ cell }) => {
+      const data = cell.getValue() as string;
+
+      return <div className="ml-4">{data}</div>;
     },
   },
 
@@ -72,7 +57,7 @@ export const columns: ColumnDef<IEquipment>[] = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const isDesktop = useMediaQuery('(min-width:1000px)');
       if (isDesktop) {
-        return <div className="">{data}</div>;
+        return <div className="text-center">{data}</div>;
       }
     },
   },
@@ -80,17 +65,16 @@ export const columns: ColumnDef<IEquipment>[] = [
     accessorKey: 'status',
     header: 'Status',
     cell: ({ cell }) => {
-      const data = cell.getValue() as string;
-
-      return <Badge variant={data === 'active' ? 'outline' : 'warning'}>{data}</Badge>;
+      const status = cell.getValue() as string;
+      return <Badge variant={status === 'active' ? 'active' : 'warning'}>{status}</Badge>;
     },
   },
   {
-    accessorKey: 'location',
+    accessorKey: 'place',
     header: 'Place',
   },
   {
-    accessorKey: 'token',
+    accessorKey: 'tokens',
     header: 'Tokens',
   },
 
@@ -128,51 +112,36 @@ export const columns: ColumnDef<IEquipment>[] = [
 
 export function EquipmentList({ user }: { user: User }) {
   const [toasted, setToasted] = useState(true);
-  // const useGetEquipments = useQuery({
-  //   queryKey: ['get-all-equipments'],
-  //   queryFn: async () => {
-  //     const res = await api.get('/equipments');
-  //     if (res.status !== 200) {
-  //       throw new Error('Server Error please try after some time');
-  //     }
-  //     console.log({ data: await res.data });
+  const allEquipments = useGetEquipments();
 
-  //     return (await res.data.equipments) as Equipment[];
-  //   },
-  // });
+  if (allEquipments.isError && !toasted) {
+    toast({
+      title: 'Server error',
+      variant: 'destructive',
+    });
+    setToasted(true);
+  }
+  console.log({ tableDAta: allEquipments.data });
 
-  // if (useGetEquipments.isError && !toasted) {
-  //   toast({
-  //     title: 'Server error',
-  //     variant: 'destructive',
-  //   });
-  //   setToasted(true);
-  // }
-  // console.log({ tableDAta: useGetEquipments.data });
-  useEffect(() => {
-    setTimeout(() => {
-      setToasted(false);
-    }, 1000);
-  }, []);
-  if (toasted) {
+  if (allEquipments.isPending) {
     return (
       <div className="flex h-full w-full  items-center justify-center  ">
         <Loader2 className="animate-spin" />
       </div>
     );
   }
-  // if (useGetEquipments.data) {
-  return (
-    <>
-      <DataTable
-        columns={columns}
-        data={equipmentData}
-        filters={[
-          { val: 'name', type: 'text' },
-          { val: 'status', type: 'text' },
-        ]}
-      />
-    </>
-  );
-  // }
+  if (allEquipments.data) {
+    return (
+      <>
+        <DataTable
+          columns={columns}
+          data={allEquipments.data}
+          filters={[
+            { val: 'name', type: 'text' },
+            { val: 'status', type: 'text' },
+          ]}
+        />
+      </>
+    );
+  }
 }

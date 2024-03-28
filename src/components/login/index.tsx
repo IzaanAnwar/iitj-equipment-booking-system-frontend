@@ -26,37 +26,14 @@ export function LoginCard() {
   const useLogin = useMutation({
     mutationKey: ['login'],
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      // const res = await api.post('/signin', {
-      //   email,
-      //   password,
-      // });
-      if (email === 'user@email.com' && password === 'test123') {
-        Cookies.set('role', 'user');
-        return {
-          user: {
-            userId: 'e6d90d5e-5bd8-4bce-91a7-1f16e9351519',
-            role: 'user',
-            supervisorId: null,
-            name: 'Izaan',
-            iat: 1711138106,
-            exp: 1711224506,
-          },
-        };
-      } else if (email === 'admin@email.com' && password === 'test123') {
-        Cookies.set('role', 'admin');
-
-        return {
-          user: {
-            userId: '285b4906-1368-40a0-bfb0-c01f58d3accb',
-            role: 'admin',
-            supervisorId: null,
-            name: 'Rahul',
-            iat: 1711138275,
-            exp: 1711224675,
-          },
-        };
+      const res = await api.post('/signin', {
+        email,
+        password,
+      });
+      if (res.status === 200) {
+        return await res.data;
       } else {
-        throw new Error('Invalid Credentials');
+        throw new Error(await res.data);
       }
       // console.log({ res });
 
@@ -80,7 +57,24 @@ export function LoginCard() {
   return (
     <Card className="w-full space-y-3 px-8 py-4 md:max-w-[80%] lg:max-w-[70%] ">
       <CardContent className="grid grid-cols-1 gap-12 md:grid-cols-2">
-        <div className="order-2 col-span-1 space-y-6 md:order-1">
+        <form
+          className="order-2 col-span-1 space-y-6 md:order-1"
+          onSubmit={(e) => {
+            e.preventDefault();
+            console.log('I am clicked');
+            setToasted(false);
+            if (!userEmail || !userPassword) {
+              toast({
+                title: 'Missing Field',
+                variant: 'destructive',
+              });
+              setToasted(true);
+              return;
+            }
+
+            useLogin.mutate({ email: userEmail, password: userPassword });
+          }}
+        >
           <CardTitle className="text-center text-3xl font-bold">Login</CardTitle>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -100,9 +94,9 @@ export function LoginCard() {
             disabled={useLogin.isPending}
             className="w-full "
             type="submit"
-            // onKeyDown={(e) => {
-            //   console.log(e);
-
+            onKeyDown={(e) => {
+              console.log(e);
+            }}
             //   if (e.key !== 'Enter') {
             //     return;
             //   }
@@ -117,25 +111,13 @@ export function LoginCard() {
             //   }
             //   useLogin.mutate({ email: userEmail, password: userPassword });
             // }}
-            onClick={() => {
-              console.log('I am clicked');
-
-              setToasted(false);
-              if (!userEmail || !userPassword) {
-                toast({
-                  title: 'Missing Field',
-                  variant: 'destructive',
-                });
-                setToasted(true);
-                return;
-              }
-
-              useLogin.mutate({ email: userEmail, password: userPassword });
-            }}
+            // onClick={() => {
+            //
+            // }}
           >
             Login
           </Button>
-        </div>
+        </form>
         <div className="order-1 col-span-1 max-h-full  overflow-clip md:order-2">
           <Image
             src="/login-page.jpg"
