@@ -11,8 +11,8 @@ import { useState } from 'react';
 import { Calendar } from '../ui/calendar';
 import { useRouter } from 'next/navigation';
 import { Input } from '../ui/input';
-// import { Maintainance } from './maintainance';
-import { useGetEquipments } from '@/hooks/use-get-equipments';
+import { Maintainance } from './maintainance';
+import { useGetActiveEquipments, useGetEquipments } from '@/hooks/use-equipments';
 import { Equipment } from '../../../types';
 import moment from 'moment';
 import { useQuery } from '@tanstack/react-query';
@@ -22,7 +22,8 @@ export function BookingsPage() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment>();
-  const allEquipments = useGetEquipments();
+  const allEquipments = useGetActiveEquipments();
+  console.log({ allEquipmentsA: allEquipments.data });
 
   console.log({ allEquipments });
 
@@ -78,7 +79,7 @@ export function BookingsPage() {
           </div>
         )}
       </div>
-      {/* <Maintainance /> */}
+      <Maintainance />
     </main>
   );
 }

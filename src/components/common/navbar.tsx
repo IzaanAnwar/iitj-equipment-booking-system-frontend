@@ -24,10 +24,10 @@ import {
 import { api } from '@/utils/axios-instance';
 import { toast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import Image from 'next/image';
-import { User } from '../../../types';
+import { IAccountDetails, User } from '../../../types';
 import { useSignOut } from '@/hooks/use-logout';
 import Link from 'next/link';
 import { Label } from '@radix-ui/react-label';
@@ -36,6 +36,16 @@ export function Navbar({ user }: { user: User | null }) {
   const [toasted, setToasted] = useState(false);
   const isDesktop = useMediaQuery('(min-width:768px');
   const router = useRouter();
+  const useGetAccountDetails = useQuery({
+    queryKey: ['account-details'],
+    queryFn: async () => {
+      const res = await api.get('/users/account');
+      if (res.status !== 200) {
+        throw new Error(await res.data);
+      }
+      return (await res.data.account) as IAccountDetails;
+    },
+  });
   const signOut = useSignOut();
   if (signOut.isSuccess) {
     router.push('/');
@@ -82,9 +92,11 @@ export function Navbar({ user }: { user: User | null }) {
           <DropdownMenuContent className="w-56 space-y-3 p-4">
             <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <Label className=" p-2">
-              <strong>Credits</strong> ₹ 10000
-            </Label>
+            {user?.role !== 'admin' && (
+              <Label className=" p-2">
+                <strong>Credits</strong> ₹ {useGetAccountDetails.data?.token}
+              </Label>
+            )}
             <Button
               onClick={() => {
                 setToasted(false);
@@ -106,7 +118,7 @@ export function Navbar({ user }: { user: User | null }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-              <SideBarContent />
+              <SideBarContent user={user} />
             </SheetContent>
           </Sheet>
         )}

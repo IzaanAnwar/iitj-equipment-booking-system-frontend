@@ -17,23 +17,14 @@ import { Equipment, EquipmentWithMaintenanceLogs } from '../../../../../../types
 import { DatePicker } from 'antd';
 import moment from 'moment';
 import { toast } from '@/components/ui/use-toast';
+import { useGetEquipment } from '@/hooks/use-equipments';
 
 export default function UpdateEquipemnt({ params }: { params: { id: string } }) {
   const [selDate, setSelDate] = useState<Date>();
   const [toasted, setToasted] = useState<boolean>(false);
   const [reason, setReason] = useState<string>();
   const router = useRouter();
-  const useGetEquipmentDetails = useQuery({
-    queryKey: ['e'],
-    queryFn: async () => {
-      const res = await api.get(`/equipments/${params.id}`);
-      console.log({ res });
-      if (res.status === 200) {
-        return (await res.data.equipment) as EquipmentWithMaintenanceLogs;
-      }
-      throw new Error(await res.data);
-    },
-  });
+  const useGetEquipmentDetails = useGetEquipment({ equipmentId: params.id });
   const useStartMaintainenance = useMutation({
     mutationKey: ['start-maintenance'],
     mutationFn: async () => {
