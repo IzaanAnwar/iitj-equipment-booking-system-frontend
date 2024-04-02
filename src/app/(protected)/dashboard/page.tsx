@@ -10,7 +10,7 @@ export default async function Dashboard() {
     redirect('/');
   }
   return (
-    <div className="px-2 py-8 md:px-16 lg:px-32">
+    <div className="px-2 py-12 md:px-10 lg:px-20">
       <h3 className="text-2xl font-bold">Equipments</h3>
       <section className="pt-8">{user.role === 'admin' ? <EquipmentList user={user} /> : <BookingsPage />}</section>
     </div>

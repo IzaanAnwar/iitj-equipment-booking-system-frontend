@@ -48,7 +48,7 @@ export const columns: ColumnDef<Equipment>[] = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const isDesktop = useMediaQuery('(min-width:1000px)');
       if (isDesktop) {
-        return <div className="text-center">Description</div>;
+        return <div className="text-center md:max-w-[28rem] lg:max-w-[32rem] xl:w-full ">Description</div>;
       }
     },
     cell: ({ cell }) => {
@@ -57,7 +57,7 @@ export const columns: ColumnDef<Equipment>[] = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const isDesktop = useMediaQuery('(min-width:1000px)');
       if (isDesktop) {
-        return <div className="text-center">{data}</div>;
+        return <div className="text-left  md:max-w-[28rem] lg:max-w-[32rem] xl:w-full">{data}</div>;
       }
     },
   },
@@ -72,11 +72,15 @@ export const columns: ColumnDef<Equipment>[] = [
   {
     accessorKey: 'place',
     header: 'Place',
+    cell: ({ cell }) => {
+      const data = cell.getValue() as string;
+      return <div className="w-full text-left">{data}</div>;
+    },
   },
-  {
-    accessorKey: 'tokens',
-    header: 'Tokens',
-  },
+  // {
+  //   accessorKey: 'tokens',
+  //   header: 'Tokens',
+  // },
 
   {
     id: 'actions',
@@ -84,8 +88,6 @@ export const columns: ColumnDef<Equipment>[] = [
     header: () => <div className="text-center">Action</div>,
     cell: ({ row, cell }) => {
       console.log({ row, cell });
-
-      const payment = row.original;
 
       return (
         <DropdownMenu>
@@ -97,7 +99,10 @@ export const columns: ColumnDef<Equipment>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem>
+              {' '}
+              <Link href={`/dashboard/edit/${row.original.id}`}>Edit</Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Link href={`/dashboard/update-equipment/${row.original.id}`}>Update Status</Link>

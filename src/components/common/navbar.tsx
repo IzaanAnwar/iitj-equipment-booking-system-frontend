@@ -68,7 +68,7 @@ export function Navbar({ user }: { user: User | null }) {
       <div className="flex items-center justify-end gap-2">
         {user?.role === 'user' && (
           <>
-            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+            <Button variant="outline" className="hidden border-border bg-primary text-primary-foreground md:block">
               <Link className="h-full w-full" href="/dashboard">
                 Home
               </Link>
@@ -78,9 +78,9 @@ export function Navbar({ user }: { user: User | null }) {
                 Instructions
               </Link>
             </Button>
-            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+            {/* <Button variant="outline" className="border-border bg-primary text-primary-foreground">
               Bookings
-            </Button>
+            </Button> */}
           </>
         )}
         <DropdownMenu>

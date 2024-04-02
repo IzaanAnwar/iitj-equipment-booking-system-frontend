@@ -20,6 +20,7 @@ import { Skeleton } from '../ui/skeleton';
 import { toast } from '../ui/use-toast';
 import { useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import Link from 'next/link';
 
 const columns: ColumnDef<Student>[] = [
   //   {
@@ -89,97 +90,25 @@ const columns: ColumnDef<Student>[] = [
       const payment = row.original;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
-const columnsWithSupervisor: ColumnDef<StudentWithSupervisor>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Name',
-  },
-  {
-    accessorKey: 'email',
-    header: () => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const isDesktop = useMediaQuery('(min-width:1000px)');
-      if (isDesktop) {
-        return <div className="text-left">Email</div>;
-      }
-    },
-    cell: ({ cell }) => {
-      const data = cell.getValue() as string;
-
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const isDesktop = useMediaQuery('(min-width:1000px)');
-      if (isDesktop) {
-        return <div className="">{data}</div>;
-      }
-    },
-  },
-  {
-    accessorKey: 'roll',
-    header: ({ column }) => {
-      return (
-        <Button variant="ghost" className="" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Roll
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ cell }) => {
-      const data = cell.getValue() as string;
-
-      return <div className="pl-4">{data}</div>;
-    },
-  },
-  {
-    accessorKey: 'supervisor.name',
-    header: 'Supervisor',
-  },
-
-  {
-    id: 'actions',
-    accessorKey: 'action',
-    header: () => <div className="text-center">Action</div>,
-    cell: ({ row }) => {
-      const payment = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="mx-auto w-fit">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href={`/students/transfer/${row.original.id}`} className="w-full">
+                  Transfer
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
     },
   },
@@ -190,24 +119,13 @@ export function StudentsList({ user }: { user: User }) {
   const useGetMyStudents = useQuery({
     queryKey: ['get-supervisors-students'],
     queryFn: async () => {
-      if (user.role === 'supervisor') {
-        const res = await api.get('/users/students/bySupervisors');
-        if (res.status !== 200) {
-          throw new Error('Server Error please try after some time');
-        }
-        console.log({ data: await res.data });
-
-        return (await res.data.students) as Student[];
+      const res = await api.get('/users/students/bySupervisors');
+      if (res.status !== 200) {
+        throw new Error('Server Error please try after some time');
       }
-      if (user.role === 'admin') {
-        const res = await api.get('/users/students/all');
-        if (res.status !== 200) {
-          throw new Error('Server Error please try after some time');
-        }
-        console.log({ data: await res.data });
+      console.log({ data: await res.data });
 
-        return (await res.data.students) as StudentWithSupervisor[];
-      }
+      return (await res.data.students) as Student[];
     },
   });
 
@@ -230,8 +148,7 @@ export function StudentsList({ user }: { user: User }) {
   if (useGetMyStudents.data) {
     return (
       <DataTable
-        // @ts-ignore
-        columns={user.role === 'admin' ? columnsWithSupervisor : columns}
+        columns={columns}
         data={useGetMyStudents.data}
         filters={[
           { val: 'name', type: 'text' },

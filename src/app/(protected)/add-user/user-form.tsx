@@ -22,6 +22,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '@/utils/axios-instance';
+import { User } from '../../../../types';
 
 const userFormSchema = z.object({
   name: z.string().min(2, {
@@ -40,7 +41,7 @@ const userFormSchema = z.object({
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
-export function UserForm() {
+export function UserForm({ user }: { user: User }) {
   const [usertype, setUsertype] = useState('');
   const [toasted, setToasted] = useState<boolean>(false);
   const form = useForm<UserFormValues>({
@@ -55,7 +56,7 @@ export function UserForm() {
       const res = await api.post('/users/students/add', {
         name: data.name,
         email: data.email,
-        roll: Number(data.uin),
+        roll: parseInt(data.uin!),
         department: data.department,
       });
       console.log({ res });
@@ -126,14 +127,15 @@ export function UserForm() {
       useAddAdmin.mutate(data);
     }
   }
-  if (!toasted && useAddSupervisor.isSuccess) {
+  if (!toasted && (useAddSupervisor.isSuccess || useAddStudent.isSuccess || useAddAdmin.isSuccess)) {
     toast({
       title: 'Success',
       variant: 'success',
-      description: useAddSupervisor.data.message || 'Equipment Added!',
+      description: 'User Added!',
     });
     setToasted(true);
-    form.reset();
+    form.reset({ department: '', email: '', name: '', uin: '' });
+    setUsertype('');
   }
   if (!toasted && useAddSupervisor.isError) {
     toast({
@@ -208,9 +210,14 @@ export function UserForm() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Select Role</SelectLabel>
-                      <SelectItem value={'user'}>User</SelectItem>
-                      <SelectItem value={'supervisor'}>Supervisor</SelectItem>
-                      <SelectItem value={'admin'}>Admin</SelectItem>
+                      {user.role === 'admin' ? (
+                        <>
+                          <SelectItem value={'supervisor'}>Supervisor</SelectItem>
+                          <SelectItem value={'admin'}>Admin</SelectItem>
+                        </>
+                      ) : (
+                        <SelectItem value={'user'}>User</SelectItem>
+                      )}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -229,7 +236,7 @@ export function UserForm() {
                 <FormItem className="animate-fade-down animate-duration-200">
                   <FormLabel>{usertype === 'user' ? 'Roll Number' : 'Department Id'}</FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} />
+                    <Input type={usertype === 'user' ? 'number' : 'text'} {...field} />
                   </FormControl>
                   <FormDescription>Mention {usertype === 'user' ? 'Roll Number' : 'Department Id'}</FormDescription>
                   <FormMessage />

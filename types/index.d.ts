@@ -3,6 +3,7 @@ export type Slot = {
   endTime: string;
   id: string;
   equipmentId: string;
+  slotCost: number;
   slotType: 'DAY' | 'EVENING' | 'NIGHT';
 };
 
@@ -13,7 +14,6 @@ export type Equipment = {
   status: 'active' | 'maintenance';
   id: string;
   slotDuration: number;
-  tokens: number;
   slots: Slot[];
 };
 
@@ -42,7 +42,6 @@ export interface MaintenanceLogWithEquipment {
     status: 'active' | 'maintenance';
     id: string;
     slotDuration: number;
-    tokens: number;
   };
 }
 
@@ -51,7 +50,9 @@ export type Student = {
   name: string;
   email: string;
   roll: number;
-  role: 'user' | 'supervisor' | 'admin' | null;
+  role: 'user' | null;
+  department: string | null;
+  supervisorId: string;
 };
 
 export interface StudentWithSupervisor extends Student {
@@ -66,14 +67,26 @@ export interface User {
   iat: string;
   exp: string;
 }
+export type Supervisor = {
+  id: string;
+  name: string;
+  email: string;
+  department: string | null;
+
+  departmentId: string | null;
+  role: 'supervisor' | null;
+};
 
 export interface IEvent {
   equipmentId: string;
-  slotDuration: Date;
+  remark: string;
+  slotDuration: number;
   userId: string;
-  id: number;
-  slotTimeStart: string;
-  slotTimeEnd: string;
+  cost: number;
+  status: 'fulfilled' | 'pending' | 'cancelled';
+  id: string;
+  slotTimeStart: Date;
+  slotTimeEnd: Date;
   bookedAt: Date | null;
   start: unknown;
   end: unknown;
@@ -81,7 +94,6 @@ export interface IEvent {
     slotDuration: number;
     name: string;
     description: string;
-    tokens: number;
   };
 }
 
@@ -90,6 +102,8 @@ export interface IReport {
   remark: string;
   slotDuration: number;
   userId: string;
+  cost: number;
+  status: 'fulfilled' | 'pending' | 'cancelled';
   id: string;
   slotTimeStart: string;
   slotTimeEnd: string;
@@ -112,7 +126,6 @@ export interface IReport {
     name: string;
     place: string;
     description: string;
-    tokens: number;
   };
 }
 

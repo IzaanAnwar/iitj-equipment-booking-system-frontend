@@ -25,9 +25,11 @@ import axios from 'axios';
 import { useState } from 'react';
 import { api } from '@/utils/axios-instance';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from '../ui/label';
 
 const slotSchema = z.object({
   type: z.enum(['DAY', 'EVENING', 'NIGHT']),
+  cost: z.string(),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
 });
@@ -40,7 +42,6 @@ const equipmentFormSchema = z.object({
     required_error: 'Please write a description to display.',
   }),
   place: z.string(),
-  cost: z.string(),
   slot: z.string(),
   equipmentTime: z.array(slotSchema).optional(),
 });
@@ -54,9 +55,15 @@ export function EquipmentForm() {
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [showNightPicker, setShowNightPicker] = useState(false);
   const [equipmentSlots, setEquipmentSlots] = useState<
-    { type: string; startTime: string | undefined | null; endTime: string | undefined | null }[] | {}[]
+    {
+      type: string;
+      startTime: string | undefined | null;
+      endTime: string | undefined | null;
+    }[]
   >([]);
-
+  const [daySlotCost, setDaySlotCost] = useState<number>();
+  const [eveningSlotCost, setEveningSlotCost] = useState<number>();
+  const [nightSlotCost, setNightSlotCost] = useState<number>();
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentFormSchema),
     mode: 'onChange',
@@ -78,43 +85,49 @@ export function EquipmentForm() {
     if (type === 'DAY') {
       setSlots(['DAY']);
       setShowDayPicker(false);
-      setEquipmentSlots((prevSlots) => {
-        const updatedSlots = [...prevSlots];
-
-        updatedSlots[0] = {};
-        return updatedSlots;
-      });
+      const newState = equipmentSlots.filter((slotInfo) => slotInfo.type === 'DAY');
+      setEquipmentSlots(newState);
     } else if (type === 'EVE') {
       setSlots(['DAY']);
       setShowEveningPicker(false);
-      setEquipmentSlots((prevSlots) => {
-        const updatedSlots = [...prevSlots];
-
-        updatedSlots[1] = {};
-        return updatedSlots;
-      });
+      const newState = equipmentSlots.filter((slotInfo) => slotInfo.type === 'EVENING');
+      setEquipmentSlots(newState);
     } else if (type === 'NIGHT') {
       setSlots(['DAY', 'EVENING']);
       setShowNightPicker(false);
-      setEquipmentSlots((prevSlots) => {
-        const updatedSlots = [...prevSlots];
-
-        updatedSlots[2] = {};
-        return updatedSlots;
-      });
+      const newState = equipmentSlots.filter((slotInfo) => slotInfo.type === 'NIGHT');
+      setEquipmentSlots(newState);
     }
   }
 
   const useAddEquipment = useMutation({
     mutationKey: ['add-equipment'],
     mutationFn: async (data: EquipmentFormValues) => {
+      const equimentSlotCategories: { type: string; cost: number; startTime: string; endTime: string }[] = [];
+      for (const category of equipmentSlots) {
+        if (category && category?.type) {
+          equimentSlotCategories.push({
+            type: category.type,
+            cost: daySlotCost!,
+            startTime: category.startTime!,
+            endTime: category.endTime!,
+          });
+        }
+      }
+      console.log({
+        name: data.name,
+        description: data.description,
+        place: data.place,
+        slot: Number(data.slot),
+        equipmentSlots: equimentSlotCategories,
+      });
+
       const res = await api.post('/equipments/add', {
         name: data.name,
         description: data.description,
-        cost: Number(data.cost),
         place: data.place,
         slot: Number(data.slot),
-        equipmentSlots: equipmentSlots,
+        equipmentSlots: equimentSlotCategories,
       });
       console.log({ res });
 
@@ -155,7 +168,7 @@ export function EquipmentForm() {
       description: useAddEquipment.data?.message || 'Equipment Added!',
     });
     setToasted(true);
-    form.reset({ cost: '', description: '', equipmentTime: [], name: '', place: '', slot: '' });
+    form.reset({ description: '', equipmentTime: [], name: '', place: '', slot: '' });
   }
 
   if (!toasted && useAddEquipment.isError) {
@@ -170,7 +183,7 @@ export function EquipmentForm() {
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
         <FormField
           control={form.control}
           name="name"
@@ -212,7 +225,7 @@ export function EquipmentForm() {
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={form.control}
           name="cost"
           render={({ field }) => (
@@ -225,7 +238,7 @@ export function EquipmentForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <FormField
           control={form.control}
@@ -246,9 +259,9 @@ export function EquipmentForm() {
                   >
                     <SelectGroup>
                       <SelectLabel>Select Equipment slot</SelectLabel>
-                      <SelectItem value={'60'}>1 hr</SelectItem>
-                      <SelectItem value={'120'}>2 hr</SelectItem>
-                      <SelectItem value={'180'}>3 hr</SelectItem>
+                      <SelectItem value={'1'}>1 hr</SelectItem>
+                      <SelectItem value={'2'}>2 hr</SelectItem>
+                      <SelectItem value={'3'}>3 hr</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -268,26 +281,28 @@ export function EquipmentForm() {
                 <>
                   <div className="flex w-full items-center justify-between gap-4">
                     {showDayPicker && (
-                      <TimePicker.RangePicker
-                        format={'hh-mm'}
-                        onSelectCapture={field.onChange}
-                        onChange={(val) => {
-                          console.log({ val: val[0]?.format('hh:mm') });
+                      <>
+                        <TimePicker.RangePicker
+                          format={'hh-mm'}
+                          onSelectCapture={field.onChange}
+                          onChange={(val) => {
+                            console.log({ val: val[0]?.format('hh:mm') });
 
-                          setEquipmentSlots((prevSlots) => {
-                            const updatedSlots = [...prevSlots];
+                            setEquipmentSlots((prevSlots) => {
+                              const updatedSlots = [...prevSlots];
 
-                            updatedSlots[0] = {
-                              ...updatedSlots[0],
-                              type: 'DAY',
-                              startTime: val[0]?.format('HH:MM'),
-                              endTime: val[1]?.format('HH:MM'),
-                            };
-                            return updatedSlots;
-                          });
-                        }}
-                        className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      />
+                              updatedSlots[0] = {
+                                ...updatedSlots[0],
+                                type: 'DAY',
+                                startTime: val[0]?.format('HH:MM'),
+                                endTime: val[1]?.format('HH:MM'),
+                              };
+                              return updatedSlots;
+                            });
+                          }}
+                          className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                      </>
                     )}
                     {showDayPicker ? (
                       <Button
@@ -311,6 +326,17 @@ export function EquipmentForm() {
                       </Button>
                     )}
                   </div>
+                  {showDayPicker && (
+                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                      <Label>Usage Charge Per Slot/ Sample</Label>
+                      <Input
+                        type="number"
+                        placeholder="eg: 1"
+                        value={daySlotCost}
+                        onChange={(e) => setDaySlotCost(parseInt(e.target.value))}
+                      />
+                    </div>
+                  )}
                   <div className="flex w-full items-center justify-between gap-4">
                     {showEveningPicker && (
                       <TimePicker.RangePicker
@@ -352,7 +378,17 @@ export function EquipmentForm() {
                       </Button>
                     )}
                   </div>
-
+                  {showEveningPicker && (
+                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                      <Label>Usage Charge Per Slot/ Sample</Label>
+                      <Input
+                        type="number"
+                        placeholder="eg: 1"
+                        value={eveningSlotCost}
+                        onChange={(e) => setEveningSlotCost(parseInt(e.target.value))}
+                      />
+                    </div>
+                  )}
                   <div className="flex w-full items-center justify-between gap-4">
                     {showNightPicker && (
                       <TimePicker.RangePicker
@@ -394,6 +430,18 @@ export function EquipmentForm() {
                       </Button>
                     )}
                   </div>
+                  {showNightPicker && (
+                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                      <Label>Usage Charge Per Slot/ Sample</Label>
+
+                      <Input
+                        type="number"
+                        placeholder="eg: 1 "
+                        value={nightSlotCost}
+                        onChange={(e) => setNightSlotCost(parseInt(e.target.value))}
+                      />
+                    </div>
+                  )}
                 </>
               </FormControl>
 

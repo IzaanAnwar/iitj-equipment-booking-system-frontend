@@ -69,7 +69,7 @@ export function DataTable<TData, TValue>({
                   placeholder={`Filter ${filter.val}...`}
                   value={(table.getColumn(filter.val)?.getFilterValue() as string) ?? ''}
                   onChange={(event) => table.getColumn(filter.val)?.setFilterValue(event.target.value)}
-                  className="max-w-sm"
+                  className="max-w-sm text-base"
                 />
               </div>
             );
@@ -120,7 +120,9 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    <TableCell className="text-[0.950rem]" key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))

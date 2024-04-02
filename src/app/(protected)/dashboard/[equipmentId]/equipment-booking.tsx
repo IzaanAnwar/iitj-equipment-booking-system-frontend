@@ -5,7 +5,7 @@ import { Calendar, SlotInfo, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
 import {
@@ -27,7 +27,6 @@ import { Loader2 } from 'lucide-react';
 import { useGetEquipment } from '@/hooks/use-equipments';
 import { Button } from '@/components/ui/button';
 import momenttz from 'moment-timezone';
-import { time } from 'console';
 type SelectedSlot = {
   year: number;
   month: number;
@@ -40,6 +39,7 @@ type SelectedSlot = {
     endHour: number;
     endMinute: number;
   };
+  cost?: number;
 };
 
 export function BookEquipment({ equipmentId, user }: { equipmentId: string; user: User | null }) {
@@ -51,6 +51,8 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
   const [dailogOpen, setdailogOpen] = useState(false);
   const [selectEvent, setSelectedEvent] = useState<IEvent>();
   const equipment = useGetEquipment({ equipmentId });
+  const [startTiming, setStartTiming] = useState<{ hour: number; min: number }>();
+  const [endTiming, setendTiming] = useState<{ hour: number; min: number }>();
   const useGetEvents = useQuery({
     queryKey: ['get-events'],
     queryFn: async () => {
@@ -67,6 +69,25 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       throw new Error('Something went wrong please try after some time.');
     },
   });
+  useEffect(() => {
+    if (!equipment.data?.slots) return;
+    console.log('STARTING SORt');
+
+    const { start, end } = findStartAndEnd(equipment.data?.slots);
+    console.log({ start, end });
+
+    const [startHour, startMinute] = parsteStrTimeToInt(start?.startTime);
+    const [endHour, endMinute] = parsteStrTimeToInt(end?.endTime);
+    setStartTiming({
+      hour: startHour,
+      min: startMinute,
+    });
+    setendTiming({
+      hour: endHour,
+      min: endMinute,
+    });
+    console.log({ startHour, endHour, startMinute, endMinute });
+  }, [equipment.data?.slots]);
 
   const useCreateBooking = useMutation({
     mutationKey: ['create-booking'],
@@ -74,6 +95,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       if (!selectedSlot) {
         throw new Error('Slot not selected');
       }
+      console.log({ selectedSlot });
 
       console.log({ selectedSlot });
 
@@ -96,25 +118,30 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         slotDuration: selectedSlot.end.endHour - selectedSlot.start.startHour,
         userId: user?.userId,
         remark: remarks,
+        cost: selectedSlot.cost,
       });
       console.log({ res });
       if (res.status === 201) {
         return await res.data;
       }
-      if (res.status === 200) {
+      if (res.status === 400) {
         throw new Error('Equipment already booked');
       }
+      if (res.status === 200) {
+        throw new Error('Equipment is under maintainance');
+      }
       throw new Error(await res.data);
+      // throw new Error('seome');
     },
   });
   const hanldeSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
       console.log({ slotInfo });
 
-      const start = moment(slotInfo.start);
-      const isWeekend = start.weekday() === 0 || start.weekday() === 6;
+      const startTime = moment(slotInfo.start);
+      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
 
-      console.log({ start, currentDate: currentDate.getDate(), isWeekend: start.weekday() });
+      console.log({ startTime, currentDate: currentDate.getDate(), isWeekend: startTime.weekday() });
 
       const bookingExists = useGetEvents.data?.find((item) => {
         console.log({ h: item.equipment.name });
@@ -131,7 +158,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           return item;
         }
       });
-      const isTodayOrFuture = moment(start).isSameOrAfter(moment(), 'day');
+      const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
 
       if (bookingExists?.id || !isTodayOrFuture) return;
       if (user?.role === 'user' && isWeekend) {
@@ -141,10 +168,24 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         });
         return;
       }
-      setSelectedSlot(parseSelectedSlot(slotInfo, equipment.data?.slots.at(0)!, equipment.data?.slotDuration!));
+      console.log({ equipmentinSlo: equipment.data });
+      const { start } = findStartAndEnd(equipment.data?.slots!);
+      const userSelectedSlot = findRighSlot(slotInfo, equipment.data?.slots!, equipment.data?.slotDuration!);
+      if (!userSelectedSlot) {
+        return;
+      }
+      const fomrattedSelectedSlotData = parseSelectedSlot({
+        slotInfo,
+        equipmentSlot: userSelectedSlot,
+        startMin: parsteStrTimeToInt(start?.startTime)[1],
+        slotDuration: equipment.data?.slotDuration!,
+      });
+      console.log({ fomrattedSelectedSlotData });
+
+      setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: userSelectedSlot.slotCost });
       setdailogOpen(true);
     },
-    [currentDate, equipment.data?.slotDuration, equipment.data?.slots, useGetEvents.data, user?.role],
+    [currentDate, equipment.data, useGetEvents.data, user?.role],
   );
 
   const { defaultDate } = useMemo(() => {
@@ -170,7 +211,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     return { style };
   };
   const localizer = momentLocalizer(moment);
-  if (useGetEvents.isPending || equipment.isPending) {
+  if (useGetEvents.isPending || equipment.isPending || !startTiming) {
     return (
       <div className="flex h-screen w-full  items-center justify-center  ">
         <Loader2 className="animate-spin" />
@@ -187,11 +228,8 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       className: isTodayOrFuture ? 'current-future-date' : 'past-date',
     };
   };
-  console.log({ equipment: equipment.data?.slots?.at(0)?.startTime, data: equipment.data });
+  console.log({ equipment: equipment.data });
 
-  const [startHour, startMinute] = parsteStrTimeToInt(equipment.data?.slots?.at(0)?.startTime);
-  const [endHour, endMinute] = parsteStrTimeToInt(equipment.data?.slots?.at(-1)?.endTime);
-  console.log({ startHour, endHour, startMinute, endMinute });
   const timeApart = equipment.data?.slotDuration;
   if (!user) {
     router.push('/');
@@ -221,15 +259,15 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     });
     setToasted(true);
   }
-  console.log({ useCreateBooking, event: useGetEvents.data, hh: typeof useGetEvents.data?.at(0)?.start });
+  console.log({ useCreateBooking, event: useGetEvents.data, startTiming, endTiming });
 
   return (
     <>
-      <div className=" flex items-center justify-end px-2 md:px-16 lg:px-32">
+      {/* <div className=" flex items-center justify-end px-2 md:px-16 lg:px-32">
         <Label className="p-2 text-lg">
           <strong>Credits</strong> ₹ 10000
         </Label>
-      </div>
+      </div> */}
       <main className="h-screen w-full px-2 py-8 md:px-16 lg:px-32">
         <Calendar
           localizer={localizer}
@@ -247,9 +285,23 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           eventPropGetter={eventStyleGetter}
           defaultDate={defaultDate}
           min={
-            new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), startHour, startMinute)
+            new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              currentDate.getDate(),
+              startTiming?.hour,
+              startTiming?.min,
+            )
           }
-          max={new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), endHour, endMinute)}
+          max={
+            new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              currentDate.getDate(),
+              endTiming?.hour,
+              endTiming?.min,
+            )
+          }
         />
         {selectedSlot && (
           <AlertDialog open={dailogOpen}>
@@ -325,21 +377,89 @@ function parsteStrTimeToInt(time: string | undefined, offset = 0): [number, numb
   return [hour, minute];
 }
 
-function parseSelectedSlot(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: number): SelectedSlot {
+function parseSelectedSlot({
+  equipmentSlot,
+  slotDuration,
+  slotInfo,
+  startMin,
+}: {
+  slotInfo: SlotInfo;
+  startMin: number;
+  equipmentSlot: Slot;
+  slotDuration: number;
+}): SelectedSlot | null {
   console.log({ slotInfo });
+  const interval = correctTiming(slotInfo, equipmentSlot, slotDuration);
+  console.log({ interval });
+
+  if (!interval) return null;
+  console.log(' Reacdes');
 
   const year = slotInfo.start.getFullYear();
   const month = slotInfo.start.getMonth();
   const date = slotInfo.start.getDate();
-  const startHour = slotInfo.start.getHours();
-  const [_, startMinute] = parsteStrTimeToInt(equipmentSlot.startTime);
+  const startHour = interval.start;
+
   const endHour = startHour + slotDuration;
-  const endMinute = startMinute;
-  return { year, month, date, start: { startHour, startMinute }, end: { endHour, endMinute } };
+  const endMinute = startMin;
+  return { year, month, date, start: { startHour, startMinute: startMin }, end: { endHour, endMinute } };
 }
 
 function addISTOffset(utcDate: Date) {
   const ISTOffset = 330; // IST offset in minutes (GMT +5:30)
   const ISTTimestamp = utcDate.getTime() + ISTOffset * 60 * 1000;
   return new Date(ISTTimestamp);
+}
+
+function findStartAndEnd(slotInfo: Slot[]) {
+  const mapping = {
+    DAY: 0,
+    EVENING: 1,
+    NIGHT: 2,
+  };
+  const sortedArray = slotInfo.sort((a, b) => mapping[a.slotType] - mapping[b.slotType]);
+
+  return { start: sortedArray.at(0), end: sortedArray.at(-1), sortedArray };
+}
+
+// function findCostOfBooking(slots: Slot[], selectedSlot: SelectedSlot) {
+//   const reqSlot = slots.find((slot) => {
+//     const startHour = parseInt(slot.startTime.split(':')[0]);
+//     const endHour = parseInt(slot.endTime.split(':')[0]);
+//     if (selectedSlot.start.startHour >= startHour && selectedSlot.end.endHour <= endHour) return slot;
+//   });
+//   console.log({ reqSlot });
+
+//   return reqSlot;
+// }
+
+function correctTiming(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: number) {
+  const startOfBooking = parseInt(equipmentSlot.startTime.split(':')[0]);
+  const endOfBooking = parseInt(equipmentSlot.endTime.split(':')[0]);
+  const startHour = slotInfo.start.getHours();
+  const endHour = slotInfo.end.getHours();
+  let intervals: { start: number; end: number }[] = [];
+  let m = startOfBooking;
+  let n = startOfBooking + slotDuration;
+  while (m < endOfBooking) {
+    console.log({ arr: intervals, start: m, end: n });
+
+    intervals.push({ start: m, end: n });
+    n = n + slotDuration;
+    m = m + slotDuration;
+  }
+
+  return intervals.find((item) => startHour >= item.start && endHour <= item.end);
+}
+
+function findRighSlot(slotInfo: SlotInfo, equipmentSlots: Slot[], slotDuration: number) {
+  const selSolt = equipmentSlots.find((slot) => {
+    const interval = correctTiming(slotInfo, slot, slotDuration);
+    console.log({ intervalssss: interval });
+
+    if (interval) return true;
+  });
+  console.log({ rightSLot: selSolt });
+
+  return selSolt;
 }

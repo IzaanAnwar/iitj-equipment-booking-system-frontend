@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function Home() {
   return (
-    <main className="h-[100vh] w-full space-y-8 bg-[#0568c1]">
+    <main className="h-[100vh] w-full space-y-8 bg-[#0568c1] text-base">
       <Header />
       <div className="flex    items-center justify-center px-2 md:px-16 lg:px-32">
         <LoginCard />
