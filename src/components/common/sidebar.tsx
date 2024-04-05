@@ -3,10 +3,9 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 import {
   ClipboardIcon,
-  GraduationCapIcon,
   LayoutDashboardIcon,
+  ListOrderedIcon,
   ListPlusIcon,
-  SquareUserRoundIcon,
   UserPlus2Icon,
   UsersIcon,
 } from 'lucide-react';
@@ -84,13 +83,15 @@ export function SideBarContent({ user }: { user: User | null }) {
           </Button>
         </div>
       )}
-      {/* <div>
-        <Button className="w-full" variant={pathName === '/account' ? 'default' : 'outline'}>
-          <Link href="/account" className="flex h-full w-full items-center justify-start gap-2">
-            <SquareUserRoundIcon /> <p className="text-base">Account</p>
-          </Link>
-        </Button>
-      </div> */}
+      {user?.role === 'supervisor' && (
+        <div>
+          <Button className="w-full" variant={pathName === '/account' ? 'default' : 'outline'}>
+            <Link href="/my-bookings" className="flex h-full w-full items-center justify-start gap-2">
+              <ListOrderedIcon /> <p className="text-base">My Bookings</p>
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

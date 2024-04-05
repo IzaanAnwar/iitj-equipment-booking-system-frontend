@@ -129,7 +129,15 @@ export interface IReport {
   };
 }
 
-export interface IAccountDetails extends User {
+export interface IAccountDetails {
+  name: string;
+  email: string;
+  department: string | null;
+  role: 'admin' | 'supervisor' | 'user' | null;
+  id: string;
+  roll: number | null;
+  departmentId: string | null;
+  supervisorId: string | null;
   supervisor: User | null;
   token: number;
 }

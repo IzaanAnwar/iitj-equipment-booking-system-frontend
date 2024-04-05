@@ -22,11 +22,12 @@ import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/c
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/utils/axios-instance';
-import { IEvent, Slot, User } from '../../../../../types';
+import { IAccountDetails, IEvent, Slot, User } from '../../../../../types';
 import { Loader2 } from 'lucide-react';
 import { useGetEquipment } from '@/hooks/use-equipments';
 import { Button } from '@/components/ui/button';
 import momenttz from 'moment-timezone';
+import { Skeleton } from '@/components/ui/skeleton';
 type SelectedSlot = {
   year: number;
   month: number;
@@ -53,6 +54,18 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
   const equipment = useGetEquipment({ equipmentId });
   const [startTiming, setStartTiming] = useState<{ hour: number; min: number }>();
   const [endTiming, setendTiming] = useState<{ hour: number; min: number }>();
+  const useGetAccountDetails = useQuery({
+    queryKey: ['account-details'],
+    queryFn: async () => {
+      const res = await api.get('/users/account');
+      console.log({ acc: res });
+
+      if (res.status !== 200) {
+        throw new Error(await res.data);
+      }
+      return (await res.data.account) as IAccountDetails;
+    },
+  });
   const useGetEvents = useQuery({
     queryKey: ['get-events'],
     queryFn: async () => {
@@ -263,11 +276,17 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
 
   return (
     <>
-      {/* <div className=" flex items-center justify-end px-2 md:px-16 lg:px-32">
-        <Label className="p-2 text-lg">
-          <strong>Credits</strong> ₹ 10000
-        </Label>
-      </div> */}
+      {useGetAccountDetails.isPending ? (
+        <div className=" flex items-center justify-end px-2 md:px-16 lg:px-32">
+          <Skeleton className="h-14 w-64" />
+        </div>
+      ) : (
+        <div className=" flex items-center justify-end px-2 md:px-16 lg:px-32">
+          <Label className="p-2 text-lg">
+            <strong>Credits</strong> ₹ {useGetAccountDetails.data?.token}
+          </Label>
+        </div>
+      )}
       <main className="h-screen w-full px-2 py-8 md:px-16 lg:px-32">
         <Calendar
           localizer={localizer}

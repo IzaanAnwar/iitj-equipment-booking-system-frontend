@@ -10,6 +10,7 @@ import { toast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { api } from '@/utils/axios-instance';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function LoginCard() {
   const router = useRouter();
@@ -22,7 +23,21 @@ export function LoginCard() {
   if (token) {
     router.push('/dashboard');
   }
+  const useForgotPassword = useMutation({
+    mutationKey: ['forgot-password'],
+    mutationFn: async ({ email }: { email: string }) => {
+      const res = await api.post('/forgot-password', {
+        email,
+      });
+      console.log({ res });
 
+      if (res.status === 200) {
+        return await res.data;
+      } else {
+        throw new Error(await res.data);
+      }
+    },
+  });
   const useLogin = useMutation({
     mutationKey: ['login'],
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
@@ -35,9 +50,6 @@ export function LoginCard() {
       } else {
         throw new Error(await res.data);
       }
-      // console.log({ res });
-
-      // return await res.data;
     },
   });
   if (useLogin.isError && !toasted) {
@@ -52,6 +64,13 @@ export function LoginCard() {
   if (useLogin.isSuccess) {
     // Cookies.set('access_token', useLogin.data.access_token);
     router.push('/dashboard');
+  }
+  if (useForgotPassword.isSuccess && !toasted) {
+    toast({
+      title: 'Check your inbox to reset your password',
+      variant: 'success',
+    });
+    setToasted(true);
   }
 
   return (
@@ -117,6 +136,26 @@ export function LoginCard() {
           >
             Login
           </Button>
+          <Link
+            href="#"
+            className="text-primary underline"
+            onClick={() => {
+              setToasted(false);
+              if (!userEmail) {
+                toast({
+                  title: 'Please provide email',
+                  variant: 'destructive',
+                });
+                setToasted(true);
+
+                return;
+              }
+              useForgotPassword.mutate({ email: userEmail });
+              console.log('mut');
+            }}
+          >
+            Forgot Password?
+          </Link>
         </form>
         <div className="order-1 col-span-1 max-h-full  overflow-clip md:order-2">
           <Image

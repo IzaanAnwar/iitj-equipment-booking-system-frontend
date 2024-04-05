@@ -37,6 +37,9 @@ export default async function middleware(req: NextRequest) {
   //     }
   //   }
 
+  if (!isLoggedIn && currUrl.includes('/reset-password')) {
+    return null;
+  }
   if (!isLoggedIn && currUrl !== '/') {
     return NextResponse.redirect(new URL(`/`, nextUrl));
   }

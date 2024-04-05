@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '../ui/button';
 import { SideBarContent } from './sidebar';
-import { MenuIcon } from 'lucide-react';
+import { MenuIcon, Rss } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,8 @@ export function Navbar({ user }: { user: User | null }) {
     queryKey: ['account-details'],
     queryFn: async () => {
       const res = await api.get('/users/account');
+      console.log({ acc: res });
+
       if (res.status !== 200) {
         throw new Error(await res.data);
       }
@@ -78,9 +80,11 @@ export function Navbar({ user }: { user: User | null }) {
                 Instructions
               </Link>
             </Button>
-            {/* <Button variant="outline" className="border-border bg-primary text-primary-foreground">
-              Bookings
-            </Button> */}
+            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+              <Link className="h-full w-full" href="/my-bookings">
+                Bookings
+              </Link>
+            </Button>
           </>
         )}
         <DropdownMenu>
