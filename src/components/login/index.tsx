@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import Cookies from 'js-cookie';
 import { toast } from '../ui/use-toast';
@@ -38,6 +38,7 @@ export function LoginCard() {
       }
     },
   });
+
   const useLogin = useMutation({
     mutationKey: ['login'],
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
@@ -116,23 +117,6 @@ export function LoginCard() {
             onKeyDown={(e) => {
               console.log(e);
             }}
-            //   if (e.key !== 'Enter') {
-            //     return;
-            //   }
-            //   setToasted(false);
-            //   if (!userEmail || !userPassword) {
-            //     toast({
-            //       title: 'Missing Field',
-            //       variant: 'destructive',
-            //     });
-            //     setToasted(true);
-            //     return;
-            //   }
-            //   useLogin.mutate({ email: userEmail, password: userPassword });
-            // }}
-            // onClick={() => {
-            //
-            // }}
           >
             Login
           </Button>

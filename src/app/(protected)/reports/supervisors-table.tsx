@@ -133,27 +133,18 @@ export const columns: ColumnDef<IReport>[] = [
   //   },
 ];
 
-export function ReportList({ id, user }: { id: string; user: User }) {
+export function SupervisorReportList({ id, user }: { id: string; user: User }) {
   const [toasted, setToasted] = useState(true);
   console.log({ id });
 
   const useGetReport = useQuery({
     queryKey: [id],
     queryFn: async () => {
-      if (user.role === 'admin') {
-        const res = await api.get(`/bookings/report?id=${id}`);
-        if (res.status !== 200) {
-          throw new Error(await res.data);
-        }
-        return (await res.data.report) as IReport[];
+      const res = await api.get(`/bookings/report/supervisor?supervisorId=${id}`);
+      if (res.status !== 200) {
+        throw new Error(await res.data);
       }
-      if (user.role === 'supervisor') {
-        const res = await api.get(`/bookings/report/students?studentId=${id}`);
-        if (res.status !== 200) {
-          throw new Error(await res.data);
-        }
-        return (await res.data.report) as IReport[];
-      }
+      return (await res.data.report) as IReport[];
     },
   });
 
@@ -175,7 +166,7 @@ export function ReportList({ id, user }: { id: string; user: User }) {
   if (useGetReport.data) {
     return (
       <div className="h-full w-full animate-fade-down animate-duration-200">
-        <h5 className="py-1 text-lg font-semibold">{user.role === 'admin' ? 'Equipment' : 'Student'} Report</h5>
+        <h5 className="py-1 text-lg font-semibold">Supervisors Report</h5>
         <DataTable columns={columns} data={useGetReport.data} />
       </div>
     );

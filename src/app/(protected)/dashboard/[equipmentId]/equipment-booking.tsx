@@ -147,6 +147,8 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       // throw new Error('seome');
     },
   });
+  console.log({ selectedSlot });
+
   const hanldeSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
       console.log({ slotInfo });
@@ -257,6 +259,18 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     setRemarks('');
     setToasted(true);
     router.push('/dashboard');
+  }
+
+  if (useCreateBooking.isError && !toasted) {
+    toast({
+      title: 'Booking Failed',
+      // @ts-ignore
+      description: useCreateBooking.error?.response?.data?.message || 'Something went wrong',
+      variant: 'destructive',
+    });
+    setdailogOpen(false);
+    setRemarks('');
+    setToasted(true);
   }
   if (equipment.isError && !toasted) {
     toast({
@@ -474,6 +488,7 @@ function correctTiming(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: nu
 function findRighSlot(slotInfo: SlotInfo, equipmentSlots: Slot[], slotDuration: number) {
   const selSolt = equipmentSlots.find((slot) => {
     const interval = correctTiming(slotInfo, slot, slotDuration);
+
     console.log({ intervalssss: interval });
 
     if (interval) return true;

@@ -26,6 +26,7 @@ import { useState } from 'react';
 import { api } from '@/utils/axios-instance';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
+import { Dayjs } from 'dayjs';
 
 const slotSchema = z.object({
   type: z.enum(['DAY', 'EVENING', 'NIGHT']),
@@ -138,6 +139,45 @@ export function EquipmentForm() {
       }
     },
   });
+  const disabledTimeDay = (current: Dayjs) => {
+    return {
+      disabledHours: () => {
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+          if (i < 0 || i > 17) {
+            hours.push(i);
+          }
+        }
+        return hours;
+      },
+    };
+  };
+  const disabledTimeEvening = (current: Dayjs) => {
+    return {
+      disabledHours: () => {
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+          if (i < 18 || i > 20) {
+            hours.push(i);
+          }
+        }
+        return hours;
+      },
+    };
+  };
+  const disabledTimeNight = (current: Dayjs) => {
+    return {
+      disabledHours: () => {
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+          if (i < 21 || i > 24) {
+            hours.push(i);
+          }
+        }
+        return hours;
+      },
+    };
+  };
 
   function onSubmit(data: EquipmentFormValues) {
     console.log({ data, equipmentSlots });
@@ -159,6 +199,19 @@ export function EquipmentForm() {
       });
     }
 
+    equipmentSlots.forEach((sl) => {
+      const startHour = sl?.startTime?.split(':')[0];
+      const endHour = sl?.endTime?.split(':')[0];
+      if (startHour && endHour) {
+        if (parseInt(startHour) === parseInt(endHour) || parseInt(startHour) > parseInt(endHour)) {
+          toast({
+            title: 'Invalid Slots Configuration selected',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+    });
     useAddEquipment.mutate(data);
   }
   if (!toasted && useAddEquipment.isSuccess) {
@@ -254,7 +307,7 @@ export function EquipmentForm() {
                   <SelectContent
                     {...field}
                     onChange={(val) => {
-                      console.log({ val });
+                      console.log({ tome: val });
                     }}
                   >
                     <SelectGroup>
@@ -284,9 +337,10 @@ export function EquipmentForm() {
                       <>
                         <TimePicker.RangePicker
                           format={'hh-mm'}
+                          disabledTime={disabledTimeDay}
                           onSelectCapture={field.onChange}
                           onChange={(val) => {
-                            console.log({ val: val[0]?.format('hh:mm') });
+                            console.log({ val: val });
 
                             setEquipmentSlots((prevSlots) => {
                               const updatedSlots = [...prevSlots];
@@ -294,8 +348,8 @@ export function EquipmentForm() {
                               updatedSlots[0] = {
                                 ...updatedSlots[0],
                                 type: 'DAY',
-                                startTime: val[0]?.format('HH:MM'),
-                                endTime: val[1]?.format('HH:MM'),
+                                startTime: val[0]?.format('HH:mm'),
+                                endTime: val[1]?.format('HH:mm'),
                               };
                               return updatedSlots;
                             });
@@ -340,15 +394,18 @@ export function EquipmentForm() {
                   <div className="flex w-full items-center justify-between gap-4">
                     {showEveningPicker && (
                       <TimePicker.RangePicker
-                        format={'hh-mm'}
+                        disabledTime={disabledTimeEvening}
+                        format={'HH:mm'}
                         onChange={(val) => {
+                          console.log({ val, vale: val[1] });
+
                           setEquipmentSlots((prevSlots) => {
                             const updatedSlots = [...prevSlots!];
                             updatedSlots[1] = {
                               ...updatedSlots[1],
                               type: 'EVENING',
-                              startTime: val[0]?.format('HH:MM'),
-                              endTime: val[1]?.format('HH:MM'),
+                              startTime: val[0]?.format('HH:mm'),
+                              endTime: val[1]?.format('HH:mm'),
                             };
                             return updatedSlots;
                           });
@@ -392,6 +449,7 @@ export function EquipmentForm() {
                   <div className="flex w-full items-center justify-between gap-4">
                     {showNightPicker && (
                       <TimePicker.RangePicker
+                        disabledTime={disabledTimeNight}
                         format={'hh-mm'}
                         onChange={(val) => {
                           setEquipmentSlots((prevSlots) => {
@@ -399,8 +457,8 @@ export function EquipmentForm() {
                             updatedSlots[2] = {
                               ...updatedSlots[2],
                               type: 'NIGHT',
-                              startTime: val[0]?.format('HH:MM'),
-                              endTime: val[1]?.format('HH:MM'),
+                              startTime: val[0]?.format('HH:mm'),
+                              endTime: val[1]?.format('HH:mm'),
                             };
                             return updatedSlots;
                           });

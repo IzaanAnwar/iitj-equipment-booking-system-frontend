@@ -52,7 +52,7 @@ export default function ResetPasswordPage({ params }: { params: { userId: string
   if (useResetPassword.isSuccess && !toasted) {
     toast({
       title: 'Password Reset Sucess',
-      variant: 'destructive',
+      variant: 'success',
     });
     setToasted(true);
     setNewPassword('');

@@ -7,6 +7,7 @@ import { TanstackQueryClientProvider } from '@/providers/tanstack-query';
 import { Toaster } from '@/components/ui/toaster';
 import { Sidebar } from '@/components/common/sidebar';
 import { getSession } from '@/actions/get-session';
+import { FooterSection } from '@/components/common/footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,11 +28,14 @@ export default async function RootLayout({
         <TanstackQueryClientProvider>
           <>
             <NextTopLoader color="#ff9000" />
-            <div className="flex h-full w-full items-start justify-start">
+            <div className="flex h-full  w-full items-start justify-start">
               <Sidebar user={user} />
               <div className="w-full">
-                <Navbar user={user} />
-                {children}
+                <div className="min-h-[100vh] pb-4">
+                  <Navbar user={user} />
+                  {children}
+                </div>
+                <FooterSection />
                 <Toaster />
               </div>
             </div>

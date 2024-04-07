@@ -7,6 +7,11 @@ export type Slot = {
   slotType: 'DAY' | 'EVENING' | 'NIGHT';
 };
 
+export type Department = {
+  id: string;
+  name: string;
+};
+
 export type Equipment = {
   name: string;
   description: string;
@@ -51,8 +56,12 @@ export type Student = {
   email: string;
   roll: number;
   role: 'user' | null;
-  department: string | null;
+  departmentId: string | null;
   supervisorId: string;
+  department: {
+    id: string;
+    name: string;
+  } | null;
 };
 
 export interface StudentWithSupervisor extends Student {
@@ -71,9 +80,12 @@ export type Supervisor = {
   id: string;
   name: string;
   email: string;
-  department: string | null;
-
   departmentId: string | null;
+  uid: string | null;
+  department: {
+    id: string;
+    name: string;
+  } | null;
   role: 'supervisor' | null;
 };
 
@@ -98,16 +110,18 @@ export interface IEvent {
 }
 
 export interface IReport {
-  equipmentId: string;
-  remark: string;
-  slotDuration: number;
-  userId: string;
-  cost: number;
-  status: 'fulfilled' | 'pending' | 'cancelled';
+  supervisorId: string;
   id: string;
-  slotTimeStart: string;
-  slotTimeEnd: string;
-  bookedAt: string | null;
+  departmentId: string;
+  status: 'fulfilled' | 'pending' | 'cancelled';
+  slotDuration: number;
+  equipmentId: string;
+  userId: string;
+  remark: string;
+  slotTimeStart: Date;
+  slotTimeEnd: Date;
+  cost: number;
+  bookedAt: Date | null;
   user: {
     id: string;
     name: string;
@@ -137,7 +151,12 @@ export interface IAccountDetails {
   id: string;
   roll: number | null;
   departmentId: string | null;
+  uid: string | null;
   supervisorId: string | null;
+  department: {
+    id: string;
+    name: string;
+  } | null;
   supervisor: User | null;
   token: number;
 }

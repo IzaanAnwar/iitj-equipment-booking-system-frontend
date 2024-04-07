@@ -19,10 +19,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '@/utils/axios-instance';
-import { User } from '../../../../types';
+import { Department, User } from '../../../../types';
 
 const userFormSchema = z.object({
   name: z.string().min(2, {
@@ -36,6 +36,7 @@ const userFormSchema = z.object({
 
   department: z.string(),
   uin: z.string().optional(),
+  token: z.string().optional(),
   userType: z.enum(['user', 'supervisor', 'admin']),
 });
 
@@ -48,18 +49,32 @@ export function UserForm({ user }: { user: User }) {
     resolver: zodResolver(userFormSchema),
     mode: 'onChange',
   });
+  const useAllDepartment = useQuery({
+    queryKey: ['all-departments'],
+    queryFn: async () => {
+      const res = await api.get('/users/departments');
+      console.log({ res });
+
+      if (res.status === 200) {
+        return (await res.data.departments) as Department[];
+      } else {
+        throw new Error(await res.data);
+      }
+    },
+  });
   const useAddStudent = useMutation({
     mutationKey: ['add-student'],
     mutationFn: async (data: UserFormValues) => {
       console.log('starting');
+      console.log({ dataaa: data });
 
       const res = await api.post('/users/students/add', {
         name: data.name,
         email: data.email,
         roll: parseInt(data.uin!),
-        department: data.department,
+        departmentId: data.department,
       });
-      console.log({ res });
+      console.log({ resSt: res });
 
       if (res.status === 201) {
         return (await res.data) as { equipmentId: string; message: string };
@@ -76,8 +91,9 @@ export function UserForm({ user }: { user: User }) {
       const res = await api.post('/users/supervisors/add', {
         name: data.name,
         email: data.email,
-        department: data.department,
-        departmentId: data.uin,
+        departmentId: data.department,
+        uid: data.uin,
+        token: parseInt(data?.token!),
       });
       console.log({ res });
 
@@ -97,7 +113,7 @@ export function UserForm({ user }: { user: User }) {
       const res = await api.post('/users/admin/add', {
         name: data.name,
         email: data.email,
-        department: data.department,
+        departmentId: data.department,
       });
       console.log({ res });
 
@@ -110,6 +126,8 @@ export function UserForm({ user }: { user: User }) {
   });
 
   function onSubmit(data: UserFormValues) {
+    console.log('I am clicked on');
+
     console.log({ data });
     setToasted(false);
     if (!data || !usertype) {
@@ -127,11 +145,21 @@ export function UserForm({ user }: { user: User }) {
       useAddAdmin.mutate(data);
     }
   }
-  if (!toasted && (useAddSupervisor.isSuccess || useAddStudent.isSuccess || useAddAdmin.isSuccess)) {
+  if (!toasted && (useAddSupervisor.isSuccess || useAddAdmin.isSuccess)) {
     toast({
       title: 'Success',
       variant: 'success',
       description: 'User Added!',
+    });
+    setToasted(true);
+    form.reset({ department: '', email: '', name: '', uin: '' });
+    setUsertype('');
+  }
+  if (!toasted && useAddStudent.isSuccess) {
+    toast({
+      title: 'Success',
+      variant: 'success',
+      description: 'Student Added!',
     });
     setToasted(true);
     form.reset({ department: '', email: '', name: '', uin: '' });
@@ -143,6 +171,24 @@ export function UserForm({ user }: { user: User }) {
       variant: 'destructive',
       //@ts-ignore
       description: useAddSupervisor.error?.response?.data?.error?.message || 'Something went wrong',
+    });
+    setToasted(true);
+  }
+  if (!toasted && useAddStudent.isError) {
+    toast({
+      title: 'Error',
+      variant: 'destructive',
+      //@ts-ignore
+      description: useAddStudent.error?.response?.data?.message || 'Something went wrong',
+    });
+    setToasted(true);
+  }
+  if (!toasted && useAddAdmin.isError) {
+    toast({
+      title: 'Error',
+      variant: 'destructive',
+      //@ts-ignore
+      description: useAddAdmin.error?.response?.data?.error?.message || 'Something went wrong',
     });
     setToasted(true);
   }
@@ -176,6 +222,7 @@ export function UserForm({ user }: { user: User }) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="department"
@@ -183,7 +230,20 @@ export function UserForm({ user }: { user: User }) {
             <FormItem>
               <FormLabel>Department</FormLabel>
               <FormControl>
-                <Input type="text" {...field} />
+                <Select onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {useAllDepartment.data?.map((dep) => {
+                      return (
+                        <SelectItem key={dep.id} value={dep.id}>
+                          {dep.name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormDescription>Mention Department</FormDescription>
               <FormMessage />
@@ -227,6 +287,22 @@ export function UserForm({ user }: { user: User }) {
             </FormItem>
           )}
         />
+        {usertype === 'supervisor' && (
+          <FormField
+            control={form.control}
+            name="token"
+            render={({ field }) => (
+              <FormItem className="animate-fade-down animate-duration-200">
+                <FormLabel>Credit Points</FormLabel>
+                <FormControl>
+                  <Input type="number" className="resize-none" {...field} />
+                </FormControl>
+                <FormDescription>Amount of credits that will be given to this users</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         {!usertype ||
           (usertype !== 'admin' && (
             <FormField
@@ -248,8 +324,9 @@ export function UserForm({ user }: { user: User }) {
         <Button
           type="submit"
           className="w-full"
-          loading={useAddSupervisor.isPending}
-          disabled={useAddSupervisor.isPending}
+          onClick={() => console.log('I am clicked')}
+          loading={useAddSupervisor.isPending || useAddAdmin.isPending || useAddStudent.isPending}
+          disabled={useAddSupervisor.isPending || useAddAdmin.isPending || useAddStudent.isPending}
         >
           Add User
         </Button>

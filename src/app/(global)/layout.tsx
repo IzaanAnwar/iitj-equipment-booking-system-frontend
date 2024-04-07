@@ -24,6 +24,9 @@ export default function RootLayout({
           <>
             <NextTopLoader color="#ff9000" />
             {children}
+            <footer className="bottom-0  w-full bg-[#0568c1] py-4   text-center text-sm text-primary-foreground">
+              Copyright © 2024 Indian Institute of Technology Jodhpur. All Rights Reserved. Credits & Attribution
+            </footer>
             <Toaster />
           </>
         </TanstackQueryClientProvider>

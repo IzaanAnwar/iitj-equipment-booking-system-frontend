@@ -47,7 +47,7 @@ const columns: ColumnDef<Supervisor>[] = [
     },
   },
   {
-    accessorKey: 'department',
+    accessorKey: 'department.name',
     header: 'Department',
   },
 
@@ -70,7 +70,7 @@ const columns: ColumnDef<Supervisor>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href={`/supervisors/manage/${row.original.id}`}>Manage Students</Link>
+              <Link href={`/supervisors/manage/${row.original.id}`}>Manage</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
