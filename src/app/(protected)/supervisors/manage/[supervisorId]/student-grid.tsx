@@ -143,7 +143,7 @@ export function StudentGrid({ user, supervisorId }: { user: User; supervisorId: 
                 <>
                   <h5 className="">{student.name}</h5>
                   <p className="hidden md:block">{student.email}</p>
-                  <p>{student.department}</p>
+                  <p>{student.department?.name}</p>
                   <Button
                     variant="default"
                     loading={useTransferStuden.isPending}
@@ -215,7 +215,7 @@ export function StudentGrid({ user, supervisorId }: { user: User; supervisorId: 
                           />
                           {supervisor.name}
                         </div>
-                        <p>{supervisor.department}</p>
+                        <p>{supervisor.department?.name}</p>
                       </CommandItem>
                     ))}
                   </ScrollArea>

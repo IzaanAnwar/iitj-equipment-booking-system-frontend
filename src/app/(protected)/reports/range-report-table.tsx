@@ -23,24 +23,30 @@ import { api } from '@/utils/axios-instance';
 import { Badge } from '@/components/ui/badge';
 import { IReport, User } from '../../../../types';
 import { useCancelBooking } from '@/hooks/use-equipments';
+import { DateRange } from 'react-day-picker';
 
-export function DepartmentReportList({ id, user }: { id: string; user: User }) {
+export function RangeReportList({ date, user }: { date: DateRange; user: User }) {
   const [toasted, setToasted] = useState(true);
-  console.log({ departmentIddd: id });
 
-  const useGetReport = useQuery({
-    queryKey: [id],
+  const getRangeReport = useQuery({
+    queryKey: ['get-range', date],
     queryFn: async () => {
-      const res = await api.get(`/bookings/report/department?departmentId=${id}`);
-      if (res.status !== 200) {
-        throw new Error(await res.data);
+      const toDate = date.to ? date.to : date.from;
+      const res = await api.get(
+        `/bookings/report/range?fromDate=${date?.from?.toISOString()}&toDate=${toDate?.toISOString()}`,
+      );
+      console.log({ resss: res });
+
+      if (res.status === 200) {
+        const data = (await res.data.report) as IReport[];
+        if (user.role === 'supervisor') {
+          const filteredData = data.filter((item) => item.supervisorId === user.userId);
+          return filteredData;
+        }
+        return data;
       }
-      const data = (await res.data.report) as IReport[];
-      if (user.role === 'supervisor') {
-        const filteredData = data.filter((item) => item.supervisorId === user.userId);
-        return filteredData;
-      }
-      return data;
+
+      throw new Error(await res.data);
     },
   });
   const cancelBooking = useCancelBooking();
@@ -176,7 +182,7 @@ export function DepartmentReportList({ id, user }: { id: string; user: User }) {
       },
     },
   ];
-  if (useGetReport.isPending) {
+  if (getRangeReport.isPending) {
     return (
       <div className="h-full min-h-[50vh] w-full ">
         <Skeleton className="min-h-[50vh] w-full  bg-primary/15" />
@@ -190,7 +196,7 @@ export function DepartmentReportList({ id, user }: { id: string; user: User }) {
       </div>
     );
   }
-  if (useGetReport.isError && !toasted) {
+  if (getRangeReport.isError && !toasted) {
     toast({
       title: 'Server error',
       variant: 'destructive',
@@ -212,16 +218,16 @@ export function DepartmentReportList({ id, user }: { id: string; user: User }) {
       description: 'Booking cancelled successfully',
       variant: 'success',
     });
-    useGetReport.refetch();
+    getRangeReport.refetch();
     setToasted(true);
   }
-  if (useGetReport.data) {
+  if (getRangeReport.data) {
     return (
       <div className="h-full w-full animate-fade-down animate-duration-200">
-        <h5 className="py-1 text-lg font-semibold">Department Report</h5>
+        <h5 className="py-1 text-lg font-semibold">Report</h5>
         <DataTable
           columns={columns}
-          data={useGetReport.data}
+          data={getRangeReport.data}
           filters={[
             { val: 'status', type: 'text' },
             { val: 'user_name', type: 'text' },

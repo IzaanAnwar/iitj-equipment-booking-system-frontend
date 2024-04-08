@@ -62,11 +62,22 @@ export const columns: ColumnDef<IReport>[] = [
   },
   {
     accessorKey: 'slotTimeStart',
-    header: () => {
+    header: ({ column }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const isDesktop = useMediaQuery('(min-width:1000px)');
       if (isDesktop) {
-        return <div className="text-center">From</div>;
+        return (
+          <div className="flex w-full items-center justify-center">
+            <Button
+              variant={'ghost'}
+              className="text-center"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              From
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        );
       }
     },
     cell: ({ cell }) => {
@@ -164,7 +175,14 @@ export function MyReportList({ id }: { id: string }) {
   if (useGetReport.data) {
     return (
       <>
-        <DataTable columns={columns} data={useGetReport.data} />
+        <DataTable
+          columns={columns}
+          data={useGetReport.data}
+          filters={[
+            { val: 'name', type: 'text' },
+            { val: 'status', type: 'text' },
+          ]}
+        />
       </>
     );
   }

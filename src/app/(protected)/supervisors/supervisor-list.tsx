@@ -47,6 +47,10 @@ const columns: ColumnDef<Supervisor>[] = [
     },
   },
   {
+    accessorKey: 'phone',
+    header: 'Phone',
+  },
+  {
     accessorKey: 'department.name',
     header: 'Department',
   },
@@ -107,7 +111,7 @@ export function SupervisorList({ user }: { user: User }) {
         data={allSupervisors.data}
         filters={[
           { val: 'name', type: 'text' },
-          { val: 'roll', type: 'number' },
+          { val: 'department_name', type: 'text' },
         ]}
       />
     );

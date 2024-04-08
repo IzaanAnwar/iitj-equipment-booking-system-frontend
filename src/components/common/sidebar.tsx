@@ -4,9 +4,13 @@ import { Button } from '../ui/button';
 import {
   ClipboardIcon,
   LayoutDashboardIcon,
+  ListIcon,
   ListOrderedIcon,
   ListPlusIcon,
+  LucideCircleUserRound,
+  UserCog2Icon,
   UserPlus2Icon,
+  UserSquare2Icon,
   UsersIcon,
 } from 'lucide-react';
 
@@ -34,6 +38,13 @@ export function SideBarContent({ user }: { user: User | null }) {
   const pathName = usePathname();
   return (
     <div className="mt-12 space-y-4 px-4 ">
+      <div className="mb-8 flex items-center justify-start gap-4 rounded-sm bg-primary/10 p-2">
+        <LucideCircleUserRound size={44} />
+        <div className="text-lg font-bold">
+          <h5>{user?.name}</h5>
+          <h5 className="text-sm text-zinc-600">{user?.role}</h5>
+        </div>
+      </div>
       <div>
         <Button className="w-full" variant={pathName.includes('/dashboard') ? 'default' : 'outline'}>
           <Link href="/dashboard" className="flex h-full w-full items-center justify-start gap-2">
@@ -51,14 +62,13 @@ export function SideBarContent({ user }: { user: User | null }) {
         </div>
       ) : (
         <div>
-          <Button className="w-full" variant={pathName === '/students' ? 'default' : 'outline'}>
+          <Button className="w-full" variant={pathName === '/supervisors' ? 'default' : 'outline'}>
             <Link href="/supervisors" className="flex h-full w-full items-center justify-start gap-2">
               <UsersIcon /> <p className="text-base">Supervisors</p>
             </Link>
           </Button>
         </div>
       )}
-
       <div>
         <Button className="w-full" variant={pathName === '/reports' ? 'default' : 'outline'}>
           <Link href="/reports" className="flex h-full w-full items-center justify-start gap-2">
@@ -73,7 +83,6 @@ export function SideBarContent({ user }: { user: User | null }) {
           </Link>
         </Button>
       </div>
-
       {user?.role === 'admin' && (
         <div>
           <Button className="w-full" variant={pathName === '/add-equipment' ? 'default' : 'outline'}>
@@ -85,9 +94,25 @@ export function SideBarContent({ user }: { user: User | null }) {
       )}
       {user?.role === 'supervisor' && (
         <div>
-          <Button className="w-full" variant={pathName === '/account' ? 'default' : 'outline'}>
+          <Button className="w-full" variant={pathName === '/my-bookings' ? 'default' : 'outline'}>
             <Link href="/my-bookings" className="flex h-full w-full items-center justify-start gap-2">
               <ListOrderedIcon /> <p className="text-base">My Bookings</p>
+            </Link>
+          </Button>
+        </div>
+      )}
+      <div>
+        <Button className="w-full" variant={pathName === '/profile' ? 'default' : 'outline'}>
+          <Link href="/profile" className="flex h-full w-full items-center justify-start gap-2">
+            <UserCog2Icon /> <p className="text-base">Profile</p>
+          </Link>
+        </Button>
+      </div>
+      {user?.role === 'admin' && (
+        <div>
+          <Button className="w-full" variant={pathName === '/add-info' ? 'default' : 'outline'}>
+            <Link href="/add-info" className="flex h-full w-full items-center justify-start gap-2">
+              <ListIcon /> <p className="text-base">Modify Instructions</p>
             </Link>
           </Button>
         </div>

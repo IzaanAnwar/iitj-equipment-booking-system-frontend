@@ -63,7 +63,7 @@ export function Navbar({ user }: { user: User | null }) {
 
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between border-b-2 border-gray-300  bg-primary px-2 py-2 text-primary-foreground md:px-16">
-      <div className="flex items-center justify-start gap-4">
+      <div className="flex cursor-pointer items-center justify-start gap-4" onClick={() => router.push('/dashboard')}>
         <Image src="/logo1.gif" alt="crdsi logo" width={48} height={48} />
         <p className="text-xl font-semibold">CDRSI</p>
       </div>
@@ -75,7 +75,7 @@ export function Navbar({ user }: { user: User | null }) {
                 Home
               </Link>
             </Button>
-            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+            <Button variant="outline" className="hidden border-border bg-primary text-primary-foreground md:block">
               <Link className="h-full w-full" href="/instructions">
                 Instructions
               </Link>
@@ -83,6 +83,11 @@ export function Navbar({ user }: { user: User | null }) {
             <Button variant="outline" className="border-border bg-primary text-primary-foreground">
               <Link className="h-full w-full" href="/my-bookings">
                 Bookings
+              </Link>
+            </Button>
+            <Button variant="outline" className="border-border bg-primary text-primary-foreground">
+              <Link className="h-full w-full" href="/profile">
+                Profile
               </Link>
             </Button>
           </>
@@ -100,6 +105,14 @@ export function Navbar({ user }: { user: User | null }) {
               <Label className=" p-2">
                 <strong>Credits</strong> ₹ {useGetAccountDetails.data?.token}
               </Label>
+            )}
+            {!isDesktop && user?.role === 'user' && (
+              <Link
+                href="/instructions"
+                className="block w-full rounded border bg-primary/10 px-3 py-2 duration-200 hover:bg-primary/15"
+              >
+                Instructions
+              </Link>
             )}
             <Button
               onClick={() => {

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Equipment, EquipmentWithMaintenanceLogs, MaintenanceLogWithEquipment } from '../../types';
 import { api } from '@/utils/axios-instance';
 
@@ -57,5 +57,19 @@ export const useGetEquipment = ({ equipmentId }: { equipmentId: string }) =>
       console.log({ data: await res.data });
 
       return (await res.data.equipment) as EquipmentWithMaintenanceLogs;
+    },
+  });
+
+export const useCancelBooking = () =>
+  useMutation({
+    mutationKey: ['cancel-booking'],
+    mutationFn: async ({ id }: { id: string }) => {
+      const res = await api.post('bookings/cancel-booking', {
+        bookingId: id,
+      });
+      if (res.status !== 200) {
+        throw new Error('failed to cancel booking');
+      }
+      return await res.data;
     },
   });

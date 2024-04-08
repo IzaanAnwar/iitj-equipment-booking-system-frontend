@@ -144,14 +144,16 @@ export interface IReport {
 }
 
 export interface IAccountDetails {
+  id: string;
   name: string;
   email: string;
-  department: string | null;
-  role: 'admin' | 'supervisor' | 'user' | null;
-  id: string;
+  address: string | null;
+  phone: string | null;
+  password: string;
   roll: number | null;
   departmentId: string | null;
   uid: string | null;
+  role: 'user' | 'supervisor' | 'admin' | null;
   supervisorId: string | null;
   department: {
     id: string;

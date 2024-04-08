@@ -173,8 +173,9 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           return item;
         }
       });
-      const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
 
+      const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
+      const now = moment();
       if (bookingExists?.id || !isTodayOrFuture) return;
       if (user?.role === 'user' && isWeekend) {
         toast({
@@ -183,12 +184,14 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         });
         return;
       }
+
       console.log({ equipmentinSlo: equipment.data });
       const { start } = findStartAndEnd(equipment.data?.slots!);
       const userSelectedSlot = findRighSlot(slotInfo, equipment.data?.slots!, equipment.data?.slotDuration!);
       if (!userSelectedSlot) {
         return;
       }
+      console.log({ startTime: startTime.hour(), now: now.hour() });
       const fomrattedSelectedSlotData = parseSelectedSlot({
         slotInfo,
         equipmentSlot: userSelectedSlot,
@@ -196,6 +199,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         slotDuration: equipment.data?.slotDuration!,
       });
       console.log({ fomrattedSelectedSlotData });
+      if (startTime.hour() < now.hour() && startTime.day() <= now.day()) return;
 
       setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: userSelectedSlot.slotCost });
       setdailogOpen(true);
@@ -382,6 +386,13 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
                       if (!selectedSlot) {
                         toast({
                           title: 'Slot not Selected',
+                          variant: 'destructive',
+                        });
+                        return;
+                      }
+                      if (!remarks) {
+                        toast({
+                          title: 'Please add a remark',
                           variant: 'destructive',
                         });
                         return;

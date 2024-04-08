@@ -1,5 +1,5 @@
 'use client';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { DataTable } from '@/components/ui/data-table';
@@ -20,6 +20,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useGetAllSupervisors } from '@/hooks/use-users';
 import { SupervisorReportList } from './supervisors-table';
 import { DepartmentReportList } from './department-table';
+import { Calendar } from '@/components/ui/calendar';
+import { DateRange } from 'react-day-picker';
+import { addDays, format } from 'date-fns';
+import { RangeReportList } from './range-report-table';
 
 export function SearchAndSelectEquipment({ user }: { user: User }) {
   const [open, setOpen] = useState(false);
@@ -31,6 +35,11 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment>();
   const [selectedDepartment, setSelectedDepartment] = useState<Department>();
   const [selectedSupervisor, setSelectedSupervisor] = useState<Supervisor>();
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
+
   const allEquipments = useGetEquipments();
   const allSupervisors = useGetAllSupervisors();
   const allDepartments = useQuery({
@@ -46,11 +55,12 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
       }
     },
   });
-  console.log({ responseeee: selectedEquipment, selectedDepartment, selectedSupervisor });
+
+  console.log({ date: date, selectedDepartment, selectedSupervisor });
 
   return (
     <main className="space-y-6">
-      <div className="flex items-center justify-start gap-8 ">
+      <div className="items-center justify-start gap-8 space-y-2 lg:flex lg:space-y-0 ">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between text-base">
@@ -79,6 +89,7 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
                         setSelectedEquipment(item);
                         setSelectedDepartment(undefined);
                         setSelectedSupervisor(undefined);
+                        setDate(undefined);
 
                         setOpen(false);
                       }}
@@ -124,7 +135,7 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
                         setSelectedDepartment(item);
                         setSelectedSupervisor(undefined);
                         setSelectedEquipment(undefined);
-                        console.log({ depa: item });
+                        setDate(undefined);
 
                         setDepartmentOpen(false);
                       }}
@@ -170,7 +181,7 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
                         setSelectedSupervisor(item);
                         setSelectedDepartment(undefined);
                         setSelectedEquipment(undefined);
-                        console.log({ item });
+                        setDate(undefined);
 
                         setSupervisorOpen(false);
                       }}
@@ -189,13 +200,50 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
             </Command>
           </PopoverContent>
         </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant={'outline'}
+              className={cn('w-full justify-start text-left font-normal', !date && 'text-muted-foreground')}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    {format(date.from, 'LLL dd, y')} - {format(date.to, 'LLL dd, y')}
+                  </>
+                ) : (
+                  format(date.from, 'LLL dd, y')
+                )
+              ) : (
+                <span>Pick a date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="range"
+              defaultMonth={date?.from}
+              selected={date}
+              onSelect={(newDate) => {
+                setDate(newDate);
+                setSelectedDepartment(undefined);
+                setSelectedEquipment(undefined);
+                setSelectedSupervisor(undefined);
+              }}
+              footer={<p className="pt-4 text-center text-sm text-primary">Select a date or range of dates</p>}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="w-full">
         {selectedEquipment && <ReportList id={selectedEquipment.id} user={user} />}
         {selectedSupervisor && <SupervisorReportList id={selectedSupervisor.id} user={user} />}
         {selectedDepartment && <DepartmentReportList id={selectedDepartment.id} user={user} />}
-        {!selectedDepartment && !selectedEquipment && !selectedSupervisor && (
+        {date?.from && <RangeReportList date={date} user={user} />}
+        {!selectedDepartment && !selectedEquipment && !selectedSupervisor && !date?.from && (
           <div className="flex  h-24 items-center justify-center border-2 border-dashed">
             <h5>No Filter Selelcted</h5>
           </div>
@@ -207,12 +255,16 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
 
 export function SearchAndSelectStudent({ user }: { user: User }) {
   const [open, setOpen] = useState(false);
-
   const [departmentOpen, setDepartmentOpen] = useState(false);
   const [value, setValue] = useState('');
   const [departmentValue, setDepartmentValue] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<Department>();
   const [selectedSudent, setSelectedSudent] = useState<Student>();
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
+
   const useGetMyStudents = useQuery({
     queryKey: ['get-supervisors-students'],
     queryFn: async () => {
@@ -240,7 +292,7 @@ export function SearchAndSelectStudent({ user }: { user: User }) {
   });
   return (
     <main className="space-y-6">
-      <div className="flex items-center justify-start gap-8 ">
+      <div className=" items-center justify-start gap-8 space-y-2 lg:flex lg:space-y-0 ">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between text-base">
@@ -267,7 +319,7 @@ export function SearchAndSelectStudent({ user }: { user: User }) {
                         );
                         setSelectedSudent(item);
                         setSelectedDepartment(undefined);
-
+                        setDate(undefined);
                         setOpen(false);
                       }}
                     >
@@ -312,7 +364,7 @@ export function SearchAndSelectStudent({ user }: { user: User }) {
                         setSelectedDepartment(item);
                         setSelectedSudent(undefined);
                         console.log({ depa: item });
-
+                        setDate(undefined);
                         setDepartmentOpen(false);
                       }}
                     >
@@ -330,11 +382,47 @@ export function SearchAndSelectStudent({ user }: { user: User }) {
             </Command>
           </PopoverContent>
         </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant={'outline'}
+              className={cn('w-full justify-start text-left font-normal', !date && 'text-muted-foreground')}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    {format(date.from, 'LLL dd, y')} - {format(date.to, 'LLL dd, y')}
+                  </>
+                ) : (
+                  format(date.from, 'LLL dd, y')
+                )
+              ) : (
+                <span>Pick a date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="range"
+              defaultMonth={date?.from}
+              selected={date}
+              onSelect={(newDate) => {
+                setDate(newDate);
+                setSelectedDepartment(undefined);
+                setSelectedSudent(undefined);
+              }}
+              footer={<p className="pt-4 text-center text-sm text-primary">Select a date or range of dates</p>}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
       <div className="w-full">
         {selectedSudent && <ReportList id={selectedSudent.id} user={user} />}
         {selectedDepartment && <DepartmentReportList id={selectedDepartment.id} user={user} />}
-        {!selectedDepartment && !selectedSudent && (
+        {date?.from && <RangeReportList date={date} user={user} />}
+        {!selectedDepartment && !selectedSudent && !date?.from && (
           <div className="flex  h-24 items-center justify-center border-2 border-dashed">
             <h5>No Filter Selelcted</h5>
           </div>

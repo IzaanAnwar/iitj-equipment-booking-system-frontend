@@ -132,7 +132,7 @@ export function TransferStudentCard({ studentId, user }: { studentId: string; us
                     <strong>Name</strong>: {selectedSupervisor.name}
                   </h5>
                   <h5>
-                    <strong>Department</strong>: {selectedSupervisor.department}
+                    <strong>Department</strong>: {selectedSupervisor.department?.name}
                   </h5>
                   <Button
                     onClick={() => {
