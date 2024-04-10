@@ -16,7 +16,7 @@ export type Equipment = {
   name: string;
   description: string;
   place: string;
-  status: 'active' | 'maintenance';
+  status: 'active' | 'maintenance' | 'retired';
   id: string;
   slotDuration: number;
   slots: Slot[];

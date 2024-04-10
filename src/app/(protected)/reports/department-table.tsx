@@ -23,6 +23,7 @@ import { api } from '@/utils/axios-instance';
 import { Badge } from '@/components/ui/badge';
 import { IReport, User } from '../../../../types';
 import { useCancelBooking } from '@/hooks/use-equipments';
+import { DownloadReport } from './download-report';
 
 export function DepartmentReportList({ id, user }: { id: string; user: User }) {
   const [toasted, setToasted] = useState(true);
@@ -219,6 +220,7 @@ export function DepartmentReportList({ id, user }: { id: string; user: User }) {
     return (
       <div className="h-full w-full animate-fade-down animate-duration-200">
         <h5 className="py-1 text-lg font-semibold">Department Report</h5>
+        <DownloadReport reports={useGetReport.data} />
         <DataTable
           columns={columns}
           data={useGetReport.data}

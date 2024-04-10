@@ -189,17 +189,27 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       const { start } = findStartAndEnd(equipment.data?.slots!);
       const userSelectedSlot = findRighSlot(slotInfo, equipment.data?.slots!, equipment.data?.slotDuration!);
       if (!userSelectedSlot) {
+        toast({
+          title: 'Equipment not available for booking',
+          description: 'Booking not allowd for selected Slot Time',
+        });
         return;
       }
-      console.log({ startTime: startTime.hour(), now: now.hour() });
+      console.log({ startTimeYAy: userSelectedSlot });
       const fomrattedSelectedSlotData = parseSelectedSlot({
         slotInfo,
         equipmentSlot: userSelectedSlot,
-        startMin: parsteStrTimeToInt(start?.startTime)[1],
+        startMin: parsteStrTimeToInt(userSelectedSlot?.startTime)[1],
         slotDuration: equipment.data?.slotDuration!,
       });
       console.log({ fomrattedSelectedSlotData });
-      if (startTime.hour() < now.hour() && startTime.day() <= now.day()) return;
+      if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
+        toast({
+          title: 'Equipment not available for booking',
+          description: 'You are selecting a past date or time',
+        });
+        return;
+      }
 
       setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: userSelectedSlot.slotCost });
       setdailogOpen(true);

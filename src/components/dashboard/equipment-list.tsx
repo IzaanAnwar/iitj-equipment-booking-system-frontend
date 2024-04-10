@@ -119,6 +119,7 @@ export function EquipmentList({ user }: { user: User }) {
                   className=""
                   variant={'destructive'}
                   size={'sm'}
+                  disabled={row.original.status === 'retired'}
                   onClick={() => {
                     setToasted(false);
                     if (!row.original.id) {
@@ -156,7 +157,7 @@ export function EquipmentList({ user }: { user: User }) {
   }
   if (removeEquipment.isError && !toasted) {
     toast({
-      title: 'Server error',
+      title: 'Oops',
       // @ts-ignore
       description: removeEquipment.error?.response?.data?.message || 'We were not able to delete this equipment!',
       variant: 'destructive',

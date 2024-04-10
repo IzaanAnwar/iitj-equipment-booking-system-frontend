@@ -22,6 +22,7 @@ import { toast } from '@/components/ui/use-toast';
 import { api } from '@/utils/axios-instance';
 import { Badge } from '@/components/ui/badge';
 import { IReport, User } from '../../../../types';
+import { DownloadReport } from '../reports/download-report';
 export const columns: ColumnDef<IReport>[] = [
   {
     accessorKey: 'equipment.name',
@@ -175,6 +176,8 @@ export function MyReportList({ id }: { id: string }) {
   if (useGetReport.data) {
     return (
       <>
+        <DownloadReport reports={useGetReport.data} />
+
         <DataTable
           columns={columns}
           data={useGetReport.data}

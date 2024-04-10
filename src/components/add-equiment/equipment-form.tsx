@@ -197,6 +197,20 @@ export function EquipmentForm() {
         title: 'Invalid Lab Hours',
         variant: 'destructive',
       });
+      return;
+    }
+    let isErr: boolean = false;
+    equipmentSlots.forEach((sl) => {
+      if (!sl.endTime || !sl.startTime || !sl.type) {
+        isErr = true;
+      }
+    });
+    if (isErr) {
+      toast({
+        title: 'You missed to determine lab hours for one or more slots type',
+        variant: 'destructive',
+      });
+      return;
     }
 
     equipmentSlots.forEach((sl) => {

@@ -1,5 +1,5 @@
 'use client';
-import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
+import { CalendarIcon, Check, ChevronsUpDown, DownloadIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { DataTable } from '@/components/ui/data-table';
@@ -24,6 +24,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { DateRange } from 'react-day-picker';
 import { addDays, format } from 'date-fns';
 import { RangeReportList } from './range-report-table';
+import { generatePDF } from '@/utils/export-functions';
 
 export function SearchAndSelectEquipment({ user }: { user: User }) {
   const [open, setOpen] = useState(false);

@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { IReport, User } from '../../../../types';
 import { useCancelBooking } from '@/hooks/use-equipments';
 import { DateRange } from 'react-day-picker';
+import { DownloadReport } from './download-report';
 
 export function RangeReportList({ date, user }: { date: DateRange; user: User }) {
   const [toasted, setToasted] = useState(true);
@@ -225,6 +226,8 @@ export function RangeReportList({ date, user }: { date: DateRange; user: User })
     return (
       <div className="h-full w-full animate-fade-down animate-duration-200">
         <h5 className="py-1 text-lg font-semibold">Report</h5>
+        <DownloadReport reports={getRangeReport.data} />
+
         <DataTable
           columns={columns}
           data={getRangeReport.data}
