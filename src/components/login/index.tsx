@@ -122,7 +122,7 @@ export function LoginCard() {
           </Button>
           <Link
             href="#"
-            className="text-primary underline"
+            className="pt-2 text-primary underline"
             onClick={() => {
               setToasted(false);
               if (!userEmail) {
