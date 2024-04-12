@@ -20,7 +20,6 @@ export default function ResetPasswordPage({ params }: { params: { userId: string
   const [userPassword, setUserPassword] = useState<string>('');
   const [toasted, setToasted] = useState<boolean>(false);
   const token = Cookies.get('access_token');
-  console.log({ token });
 
   if (token) {
     router.push('/dashboard');
@@ -72,7 +71,6 @@ export default function ResetPasswordPage({ params }: { params: { userId: string
               className="order-2 col-span-1 space-y-6 md:order-1"
               onSubmit={(e) => {
                 e.preventDefault();
-                console.log('I am clicked');
                 setToasted(false);
                 if (!newPassword || !userPassword) {
                   toast({

@@ -47,7 +47,6 @@ export function UpdateProfile({ user }: { user: User }) {
     queryKey: ['all-departments'],
     queryFn: async () => {
       const res = await api.get('/users/departments');
-      console.log({ res });
 
       if (res.status === 200) {
         return (await res.data.departments) as Department[];
@@ -60,7 +59,6 @@ export function UpdateProfile({ user }: { user: User }) {
     queryKey: ['account-details'],
     queryFn: async () => {
       const res = await api.get('/users/account');
-      console.log({ acc: res });
 
       if (res.status !== 200) {
         throw new Error(await res.data);
@@ -71,16 +69,12 @@ export function UpdateProfile({ user }: { user: User }) {
   const useUpdateDetails = useMutation({
     mutationKey: ['update-student'],
     mutationFn: async (data: UserFormValues) => {
-      console.log('starting');
-      console.log({ dataaa: data });
-
       const res = await api.post('/users/update', {
         phone: data.phone,
         address: data.address,
         roll: data.uin ? parseInt(data.uin) : 0,
         departmentId: data.department,
       });
-      console.log({ resSt: res });
 
       if (res.status === 200) {
         return (await res.data) as { equipmentId: string; message: string };
@@ -92,12 +86,9 @@ export function UpdateProfile({ user }: { user: User }) {
   const useAddDepartment = useMutation({
     mutationKey: ['add-department'],
     mutationFn: async () => {
-      console.log('starting');
-
       const res = await api.post('/users/department/add', {
         name: departemntName,
       });
-      console.log({ resSt: res });
 
       if (res.status === 201) {
         return await res.data;
@@ -108,9 +99,6 @@ export function UpdateProfile({ user }: { user: User }) {
   });
 
   function onSubmit(data: UserFormValues) {
-    console.log('I am clicked on');
-
-    console.log({ data });
     setToasted(false);
     if (!data) {
       toast({
@@ -118,7 +106,6 @@ export function UpdateProfile({ user }: { user: User }) {
         variant: 'destructive',
       });
     }
-    console.log({ update: data });
     useUpdateDetails.mutate(data);
   }
   if (useAllDepartment.isPending || useGetAccountDetails.isPending) {

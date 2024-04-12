@@ -47,7 +47,6 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
     queryKey: ['all-departments'],
     queryFn: async () => {
       const res = await api.get('/users/departments');
-      console.log({ res });
 
       if (res.status === 200) {
         return (await res.data.departments) as Department[];
@@ -56,8 +55,6 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
       }
     },
   });
-
-  console.log({ date: date, selectedDepartment, selectedSupervisor });
 
   return (
     <main className="space-y-6">
@@ -80,13 +77,10 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
                       key={eqipment.id}
                       value={eqipment.name.toLowerCase()}
                       onSelect={(currentValue) => {
-                        console.log({ currentValue });
-
                         setValue(currentValue === value ? '' : currentValue);
                         const item = allEquipments.data.find(
                           (eqipment) => eqipment.name.toLowerCase() === currentValue,
                         );
-                        console.log({ equipmentItem: item });
                         setSelectedEquipment(item);
                         setSelectedDepartment(undefined);
                         setSelectedSupervisor(undefined);
@@ -127,8 +121,6 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
                       key={department.id}
                       value={department.name.toLowerCase()}
                       onSelect={(currentValue) => {
-                        console.log({ currentValue });
-
                         setDepartmentValue(currentValue === departmentValue ? '' : currentValue);
                         const item = allDepartments.data.find(
                           (department) => department.name.toLowerCase() === currentValue,
@@ -173,8 +165,6 @@ export function SearchAndSelectEquipment({ user }: { user: User }) {
                       key={supervisor.id}
                       value={supervisor.name.toLowerCase()}
                       onSelect={(currentValue) => {
-                        console.log({ currentValue });
-
                         setSupervisorValue(currentValue === supervisorValue ? '' : currentValue);
                         const item = allSupervisors.data.find(
                           (supervisor) => supervisor.name.toLowerCase() === currentValue,
@@ -273,7 +263,6 @@ export function SearchAndSelectStudent({ user }: { user: User }) {
       if (res.status !== 200) {
         throw new Error('Server Error please try after some time');
       }
-      console.log({ data: await res.data });
 
       return (await res.data.students) as Student[];
     },
@@ -282,7 +271,6 @@ export function SearchAndSelectStudent({ user }: { user: User }) {
     queryKey: ['all-departments'],
     queryFn: async () => {
       const res = await api.get('/users/departments');
-      console.log({ res });
 
       if (res.status === 200) {
         return (await res.data.departments) as Department[];

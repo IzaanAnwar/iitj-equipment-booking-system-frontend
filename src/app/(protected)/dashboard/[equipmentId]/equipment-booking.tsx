@@ -58,7 +58,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     queryKey: ['account-details'],
     queryFn: async () => {
       const res = await api.get('/users/account');
-      console.log({ acc: res });
 
       if (res.status !== 200) {
         throw new Error(await res.data);
@@ -84,10 +83,8 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
   });
   useEffect(() => {
     if (!equipment.data?.slots) return;
-    console.log('STARTING SORt');
 
     const { start, end } = findStartAndEnd(equipment.data?.slots);
-    console.log({ start, end });
 
     const [startHour, startMinute] = parsteStrTimeToInt(start?.startTime);
     const [endHour, endMinute] = parsteStrTimeToInt(end?.endTime);
@@ -99,7 +96,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       hour: endHour,
       min: endMinute,
     });
-    console.log({ startHour, endHour, startMinute, endMinute });
   }, [equipment.data?.slots]);
 
   const useCreateBooking = useMutation({
@@ -108,9 +104,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       if (!selectedSlot) {
         throw new Error('Slot not selected');
       }
-      console.log({ selectedSlot });
-
-      console.log({ selectedSlot });
 
       const res = await api.post('/bookings/create-booking', {
         equipmentId,
@@ -133,7 +126,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         remark: remarks,
         cost: selectedSlot.cost,
       });
-      console.log({ res });
       if (res.status === 201) {
         return await res.data;
       }
@@ -147,20 +139,13 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       // throw new Error('seome');
     },
   });
-  console.log({ selectedSlot });
 
   const hanldeSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
-      console.log({ slotInfo });
-
       const startTime = moment(slotInfo.start);
       const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
 
-      console.log({ startTime, currentDate: currentDate.getDate(), isWeekend: startTime.weekday() });
-
       const bookingExists = useGetEvents.data?.find((item) => {
-        console.log({ h: item.equipment.name });
-
         const startSlot = item.start;
         const startSlotSel = slotInfo.start;
         const endSlot = item.end;
@@ -185,7 +170,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         return;
       }
 
-      console.log({ equipmentinSlo: equipment.data });
       const { start } = findStartAndEnd(equipment.data?.slots!);
       const userSelectedSlot = findRighSlot(slotInfo, equipment.data?.slots!, equipment.data?.slotDuration!);
       if (!userSelectedSlot) {
@@ -195,14 +179,12 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         });
         return;
       }
-      console.log({ startTimeYAy: userSelectedSlot });
       const fomrattedSelectedSlotData = parseSelectedSlot({
         slotInfo,
         equipmentSlot: userSelectedSlot,
         startMin: parsteStrTimeToInt(userSelectedSlot?.startTime)[1],
         slotDuration: equipment.data?.slotDuration!,
       });
-      console.log({ fomrattedSelectedSlotData });
       if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
         toast({
           title: 'Equipment not available for booking',
@@ -214,7 +196,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: userSelectedSlot.slotCost });
       setdailogOpen(true);
     },
-    [currentDate, equipment.data, useGetEvents.data, user?.role],
+    [equipment.data, useGetEvents.data, user?.role],
   );
 
   const { defaultDate } = useMemo(() => {
@@ -227,7 +209,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
   }, []);
 
   const eventStyleGetter = (event: IEvent) => {
-    console.log({ event });
     setSelectedEvent(event);
     let style = {
       backgroundColor: 'inherit',
@@ -247,7 +228,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       </div>
     );
   }
-  console.log({ eventsData: useGetEvents.data });
 
   const customDayPropGetter = (date: Date) => {
     const today = moment();
@@ -257,7 +237,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       className: isTodayOrFuture ? 'current-future-date' : 'past-date',
     };
   };
-  console.log({ equipment: equipment.data });
 
   const timeApart = equipment.data?.slotDuration;
   if (!user) {
@@ -300,7 +279,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     });
     setToasted(true);
   }
-  console.log({ useCreateBooking, event: useGetEvents.data, startTiming, endTiming });
 
   return (
     <>
@@ -426,7 +404,6 @@ function parsteStrTimeToInt(time: string | undefined, offset = 0): [number, numb
   const timParts = time.split(':');
   const hour = parseInt(timParts[0], 10) + offset;
   const minute = parseInt(timParts[1], 10);
-  console.log({ hour, minute });
 
   return [hour, minute];
 }
@@ -442,12 +419,9 @@ function parseSelectedSlot({
   equipmentSlot: Slot;
   slotDuration: number;
 }): SelectedSlot | null {
-  console.log({ slotInfo });
   const interval = correctTiming(slotInfo, equipmentSlot, slotDuration);
-  console.log({ interval });
 
   if (!interval) return null;
-  console.log(' Reacdes');
 
   const year = slotInfo.start.getFullYear();
   const month = slotInfo.start.getMonth();
@@ -496,8 +470,6 @@ function correctTiming(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: nu
   let m = startOfBooking;
   let n = startOfBooking + slotDuration;
   while (m < endOfBooking) {
-    console.log({ arr: intervals, start: m, end: n });
-
     intervals.push({ start: m, end: n });
     n = n + slotDuration;
     m = m + slotDuration;
@@ -510,11 +482,8 @@ function findRighSlot(slotInfo: SlotInfo, equipmentSlots: Slot[], slotDuration: 
   const selSolt = equipmentSlots.find((slot) => {
     const interval = correctTiming(slotInfo, slot, slotDuration);
 
-    console.log({ intervalssss: interval });
-
     if (interval) return true;
   });
-  console.log({ rightSLot: selSolt });
 
   return selSolt;
 }

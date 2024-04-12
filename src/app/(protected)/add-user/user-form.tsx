@@ -53,7 +53,6 @@ export function UserForm({ user }: { user: User }) {
     queryKey: ['all-departments'],
     queryFn: async () => {
       const res = await api.get('/users/departments');
-      console.log({ res });
 
       if (res.status === 200) {
         return (await res.data.departments) as Department[];
@@ -65,16 +64,12 @@ export function UserForm({ user }: { user: User }) {
   const useAddStudent = useMutation({
     mutationKey: ['add-student'],
     mutationFn: async (data: UserFormValues) => {
-      console.log('starting');
-      console.log({ dataaa: data });
-
       const res = await api.post('/users/students/add', {
         name: data.name,
         email: data.email,
         roll: parseInt(data.uin!),
         departmentId: data.department,
       });
-      console.log({ resSt: res });
 
       if (res.status === 201) {
         return (await res.data) as { equipmentId: string; message: string };
@@ -86,8 +81,6 @@ export function UserForm({ user }: { user: User }) {
   const useAddSupervisor = useMutation({
     mutationKey: ['add-supervisor'],
     mutationFn: async (data: UserFormValues) => {
-      console.log('starting');
-
       const res = await api.post('/users/supervisors/add', {
         name: data.name,
         email: data.email,
@@ -95,7 +88,6 @@ export function UserForm({ user }: { user: User }) {
         uid: data.uin,
         token: parseInt(data?.token!),
       });
-      console.log({ res });
 
       if (res.status === 201) {
         return (await res.data) as { equipmentId: string; message: string };
@@ -108,14 +100,11 @@ export function UserForm({ user }: { user: User }) {
   const useAddAdmin = useMutation({
     mutationKey: ['add-admin'],
     mutationFn: async (data: UserFormValues) => {
-      console.log('starting');
-
       const res = await api.post('/users/admin/add', {
         name: data.name,
         email: data.email,
         departmentId: data.department,
       });
-      console.log({ res });
 
       if (res.status === 201) {
         return (await res.data) as { equipmentId: string; message: string };
@@ -126,9 +115,6 @@ export function UserForm({ user }: { user: User }) {
   });
 
   function onSubmit(data: UserFormValues) {
-    console.log('I am clicked on');
-
-    console.log({ data });
     setToasted(false);
     if (!data || !usertype) {
       toast({
@@ -136,7 +122,6 @@ export function UserForm({ user }: { user: User }) {
         variant: 'destructive',
       });
     }
-    console.log(data);
     if (usertype === 'supervisor') {
       useAddSupervisor.mutate(data);
     } else if (usertype === 'user') {
@@ -324,7 +309,6 @@ export function UserForm({ user }: { user: User }) {
         <Button
           type="submit"
           className="w-full"
-          onClick={() => console.log('I am clicked')}
           loading={useAddSupervisor.isPending || useAddAdmin.isPending || useAddStudent.isPending}
           disabled={useAddSupervisor.isPending || useAddAdmin.isPending || useAddStudent.isPending}
         >

@@ -16,14 +16,11 @@ import { NextRequest, NextResponse } from 'next/server';
 export default async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const cookiesList = req.headers.get('cookie');
-  console.log({ cookiesList });
 
   const token = cookiesList?.split('=').at(1);
-  console.log({ token });
 
   //   const user = await pareseToken({ cookies: token! });
   const isLoggedIn = !!token;
-  console.log({ isLoggedIn });
 
   const currUrl = nextUrl.pathname;
   const isUserRestrictedRoute = USER_RESTRICTED_ROUTES.includes(currUrl);

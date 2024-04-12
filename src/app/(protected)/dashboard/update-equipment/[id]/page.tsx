@@ -111,7 +111,6 @@ export default function UpdateEquipemnt({ params }: { params: { id: string } }) 
                   }}
                   showTime={{ use12Hours: true }}
                   disabledDate={(current) => {
-                    console.log({ current });
                     return current && current.valueOf() < moment().startOf('day').valueOf();
                   }}
                 />

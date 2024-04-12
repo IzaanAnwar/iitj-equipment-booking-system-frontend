@@ -25,7 +25,6 @@ export function AddInformation() {
       ['clean'],
     ],
   };
-  console.log({ value });
   const updateInstructions = useMutation({
     mutationKey: ['update-info'],
     mutationFn: async () => {
@@ -73,7 +72,6 @@ export function AddInformation() {
   if (instructions.isSuccess && value === '') {
     setValue(instructions.data.text);
   }
-  console.log({ value });
   const quillFormats = [
     'header',
     'bold',
