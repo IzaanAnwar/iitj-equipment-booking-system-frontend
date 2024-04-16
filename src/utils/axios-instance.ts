@@ -1,6 +1,13 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export const api = axios.create({
-  baseURL: 'http://172.16.100.22/api/',
-  withCredentials: true,
+  baseURL: 'http://localhost:8000/api/',
+});
+api.interceptors.request.use((config) => {
+  const token = Cookies.get('access_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });

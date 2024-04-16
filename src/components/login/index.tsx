@@ -47,6 +47,9 @@ export function LoginCard() {
         password,
       });
       if (res.status === 200) {
+        const token = await res.data.token;
+        if (!token) throw new Error('Access Token not found');
+        Cookies.set('access_token', token);
         return await res.data;
       } else {
         throw new Error(await res.data);
