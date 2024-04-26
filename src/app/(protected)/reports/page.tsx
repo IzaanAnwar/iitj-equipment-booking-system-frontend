@@ -1,10 +1,14 @@
 import { getSession } from '@/actions/get-session';
 import { SearchAndSelectEquipment, SearchAndSelectStudent } from './category-search';
 import { Unauthorized } from '@/components/common/unauthorised';
+import { redirect } from 'next/navigation';
 
 export default async function ReportsPage() {
   const user = await getSession();
-  if (!user || user.role === 'user') {
+  if (!user) {
+    redirect('/');
+  }
+  if (user.role === 'user') {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="w-full md:w-1/2">

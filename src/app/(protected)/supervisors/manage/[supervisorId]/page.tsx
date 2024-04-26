@@ -1,10 +1,14 @@
 import { getSession } from '@/actions/get-session';
 import { Unauthorized } from '@/components/common/unauthorised';
 import { StudentGrid } from './student-grid';
+import { redirect } from 'next/navigation';
 
 export default async function SupervisorsPage({ params }: { params: { supervisorId: string } }) {
   const user = await getSession();
-  if (!user || user.role !== 'admin') {
+  if (!user) {
+    redirect('/');
+  }
+  if (user.role !== 'admin') {
     return (
       <div className="flex min-h-[60vh] items-center justify-center ">
         <div className="max-w-[60%]">

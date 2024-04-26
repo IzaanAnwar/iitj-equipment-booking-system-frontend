@@ -1,10 +1,15 @@
 import { getSession } from '@/actions/get-session';
 import { Unauthorized } from '@/components/common/unauthorised';
 import { MyReportList } from './my-bookings-table';
+import { redirect } from 'next/navigation';
 
 export default async function MyBookingsPage() {
   const user = await getSession();
-  if (!user || !user.userId) {
+
+  if (!user) {
+    redirect('/');
+  }
+  if (!user.userId) {
     return <Unauthorized />;
   }
   return (

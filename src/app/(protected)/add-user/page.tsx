@@ -2,10 +2,15 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { UserForm } from './user-form';
 import { getSession } from '@/actions/get-session';
 import { Unauthorized } from '@/components/common/unauthorised';
+import { redirect } from 'next/navigation';
 
 export default async function AddEquipment() {
   const user = await getSession();
-  if (!user || user.role === 'user') {
+
+  if (!user?.userId) {
+    redirect('/');
+  }
+  if (user.role === 'user') {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="w-full md:w-1/2">

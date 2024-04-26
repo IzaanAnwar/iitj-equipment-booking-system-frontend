@@ -1,10 +1,14 @@
 import { getSession } from '@/actions/get-session';
 import { TransferStudentCard } from './transfer-card';
 import { Unauthorized } from '@/components/common/unauthorised';
+import { redirect } from 'next/navigation';
 
 export default async function TransferStudent({ params }: { params: { studentId: string } }) {
   const user = await getSession();
-  if (!user || user.role !== 'supervisor') {
+  if (!user) {
+    redirect('/');
+  }
+  if (user.role !== 'supervisor') {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-[60%]">

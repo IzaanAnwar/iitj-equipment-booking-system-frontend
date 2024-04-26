@@ -32,6 +32,9 @@ export function Sidebar({ user }: { user: User | null }) {
       </nav>
     );
   }
+  if (!user) {
+    return null;
+  }
 }
 
 export function SideBarContent({ user }: { user: User | null }) {

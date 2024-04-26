@@ -86,6 +86,7 @@ export function AddInformation() {
     'align',
     'color',
     'code-block',
+    'size',
   ];
 
   return (

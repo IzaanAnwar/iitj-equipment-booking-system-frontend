@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 const QuillEditor = dynamic(() => import('react-quill'), { ssr: false });
 import 'react-quill/dist/quill.snow.css';
+import Cookies from 'js-cookie';
 
 export default function Instructions() {
   const [value, setValue] = useState('');
@@ -33,7 +34,7 @@ export default function Instructions() {
   if (instructions.data)
     return (
       <main className="space-y-6 px-2 py-8 md:px-16 lg:px-32">
-        <div dangerouslySetInnerHTML={{ __html: value }}></div>
+        <div className="ql-editor" dangerouslySetInnerHTML={{ __html: value }}></div>
       </main>
     );
 }
