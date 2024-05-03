@@ -13,7 +13,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { UseQueryResult, useQuery } from '@tanstack/react-query';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+
+import { UseQueryResult, useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '@/utils/axios-instance';
 import { useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -22,70 +34,97 @@ import { Supervisor, User } from '../../../../types';
 import { useGetAllSupervisors } from '@/hooks/use-users';
 import { toast } from '@/components/ui/use-toast';
 
-const columns: ColumnDef<Supervisor>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Name',
-  },
-  {
-    accessorKey: 'email',
-    header: () => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const isDesktop = useMediaQuery('(min-width:1000px)');
-      if (isDesktop) {
-        return <div className="text-left">Email</div>;
-      }
-    },
-    cell: ({ cell }) => {
-      const data = cell.getValue() as string;
-
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const isDesktop = useMediaQuery('(min-width:1000px)');
-      if (isDesktop) {
-        return <div className="">{data}</div>;
-      }
-    },
-  },
-  {
-    accessorKey: 'phone',
-    header: 'Phone',
-  },
-  {
-    accessorKey: 'department.name',
-    header: 'Department',
-  },
-
-  {
-    id: 'actions',
-    accessorKey: 'action',
-    header: () => <div className="text-left">Action</div>,
-    cell: ({ row }) => {
-      const payment = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href={`/supervisors/manage/${row.original.id}`}>Manage</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
-
 export function SupervisorList({ user }: { user: User }) {
   const [toasted, setToasted] = useState(false);
+  const [open, setopen] = useState(false);
+  const [selUser, setSelUser] = useState<string>('');
   const allSupervisors = useGetAllSupervisors();
+  const suspendUser = useMutation({
+    mutationKey: ['suspend-user'],
+    mutationFn: async (userId: string) => {
+      const res = await api.post('/users/suspend', {
+        id: userId,
+      });
+      if (res.status !== 200) {
+        throw new Error(res.data);
+      }
+      return res.data;
+    },
+  });
+
+  const columns: ColumnDef<Supervisor>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Name',
+    },
+    {
+      accessorKey: 'email',
+      header: () => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const isDesktop = useMediaQuery('(min-width:1000px)');
+        if (isDesktop) {
+          return <div className="text-left">Email</div>;
+        }
+      },
+      cell: ({ cell }) => {
+        const data = cell.getValue() as string;
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const isDesktop = useMediaQuery('(min-width:1000px)');
+        if (isDesktop) {
+          return <div className="">{data}</div>;
+        }
+      },
+    },
+    {
+      accessorKey: 'phone',
+      header: 'Phone',
+    },
+    {
+      accessorKey: 'department.name',
+      header: 'Department',
+    },
+
+    {
+      id: 'actions',
+      accessorKey: 'action',
+      header: () => <div className="text-left">Action</div>,
+      cell: ({ row }) => {
+        const data = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href={`/supervisors/manage/${row.original.id}`}>Manage</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Button
+                  size={'sm'}
+                  onClick={() => {
+                    setSelUser(data.id);
+                    setopen(true);
+                  }}
+                  className="w-full"
+                  variant={'destructive'}
+                >
+                  Remove
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   if (allSupervisors.isPending) {
     return (
@@ -101,19 +140,57 @@ export function SupervisorList({ user }: { user: User }) {
     });
     setToasted(true);
   }
-  console.log({ tableDAta: allSupervisors.data });
+  if (suspendUser.isSuccess && !toasted) {
+    toast({
+      title: 'Removed',
+    });
+    setToasted(true);
+  }
+  if (suspendUser.isError && !toasted) {
+    toast({
+      title: 'Error',
+      // @ts-ignore
+      description: suspendUser?.error?.response?.data?.message || 'Internal Server Error',
+      variant: 'destructive',
+    });
+    setToasted(true);
+  }
 
   if (allSupervisors.data) {
     return (
-      <DataTable
-        // @ts-ignore
-        columns={columns}
-        data={allSupervisors.data}
-        filters={[
-          { val: 'name', type: 'text' },
-          { val: 'department_name', type: 'text' },
-        ]}
-      />
+      <>
+        <AlertDialog open={open} onOpenChange={(state) => setopen(state)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your account and remove your data from our
+                servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  suspendUser.mutate(selUser);
+                  allSupervisors.refetch();
+                }}
+              >
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <DataTable
+          // @ts-ignore
+          columns={columns}
+          data={allSupervisors.data}
+          filters={[
+            { val: 'name', type: 'text' },
+            { val: 'department_name', type: 'text' },
+          ]}
+        />
+      </>
     );
   }
 }

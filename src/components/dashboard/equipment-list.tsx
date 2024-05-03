@@ -142,6 +142,11 @@ export function EquipmentList({ user }: { user: User }) {
                   Update Status
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href={`/dashboard/edit/${row.original.id}`} className="h-full w-full">
+                  Edit
+                </Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );

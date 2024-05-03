@@ -396,7 +396,7 @@ export function EquipmentForm() {
                   </div>
                   {showDayPicker && (
                     <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                      <Label>Usage Charge Per Slot/ Sample</Label>
+                      <Label>Usage Charge Per Slot</Label>
                       <Input
                         type="number"
                         placeholder="eg: 1"
@@ -451,7 +451,7 @@ export function EquipmentForm() {
                   </div>
                   {showEveningPicker && (
                     <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                      <Label>Usage Charge Per Slot/ Sample</Label>
+                      <Label>Usage Charge Per Slot</Label>
                       <Input
                         type="number"
                         placeholder="eg: 1"
@@ -504,7 +504,7 @@ export function EquipmentForm() {
                   </div>
                   {showNightPicker && (
                     <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                      <Label>Usage Charge Per Slot/ Sample</Label>
+                      <Label>Usage Charge Per Slot</Label>
 
                       <Input
                         type="number"

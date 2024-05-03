@@ -9,8 +9,10 @@ import { useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import { Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 const QuillEditor = dynamic(() => import('react-quill'), { ssr: false });
 export function AddInformation() {
+  const [readonly, setreadonly] = useState(true);
   const [value, setValue] = useState('');
   const [toasted, setToasted] = useState<boolean>(false);
   const modules = {
@@ -25,6 +27,7 @@ export function AddInformation() {
       ['clean'],
     ],
   };
+  const router = useRouter();
   const updateInstructions = useMutation({
     mutationKey: ['update-info'],
     mutationFn: async () => {
@@ -61,6 +64,9 @@ export function AddInformation() {
       variant: 'success',
     });
     setToasted(true);
+    setreadonly(true);
+    router.refresh();
+    updateInstructions.reset();
   }
   if (instructions.isPending) {
     return (
@@ -92,6 +98,7 @@ export function AddInformation() {
   return (
     <div className="min-h-[70vh] w-full space-y-4 text-[1rem]">
       <QuillEditor
+        readOnly={readonly}
         theme="snow"
         value={value}
         onChange={setValue}
@@ -99,22 +106,36 @@ export function AddInformation() {
         formats={quillFormats}
         className="h-full   w-full"
       />
-      <Button
-        loading={updateInstructions.isPending}
-        disabled={updateInstructions.isPending}
-        onClick={() => {
-          setToasted(false);
-          if (!value) {
-            toast({
-              title: 'No data provided',
-              variant: 'destructive',
-            });
-          }
-          updateInstructions.mutate();
-        }}
-      >
-        Save
-      </Button>
+      <div className="flex items-center justify-start gap-4">
+        <Button onClick={() => setreadonly(false)} variant={readonly ? 'default' : 'outline'}>
+          Edit
+        </Button>
+        <Button
+          loading={updateInstructions.isPending}
+          disabled={updateInstructions.isPending}
+          onClick={() => {
+            setToasted(false);
+
+            if (readonly) {
+              toast({
+                title: 'No changes made',
+                variant: 'destructive',
+              });
+              return;
+            }
+            if (!value) {
+              toast({
+                title: 'No data provided',
+                variant: 'destructive',
+              });
+              return;
+            }
+            updateInstructions.mutate();
+          }}
+        >
+          Save
+        </Button>
+      </div>
     </div>
   );
 }
