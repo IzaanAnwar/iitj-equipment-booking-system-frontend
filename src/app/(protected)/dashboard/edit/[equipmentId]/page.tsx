@@ -217,7 +217,11 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
       </div>
     );
   }
-  if ((updateEquipmetnDetails.isSuccess || deleteSlot.isSuccess) && !toasted) {
+  if (updateEquipmetnDetails.isSuccess && !toasted) {
+    toast({ title: 'Updated', variant: 'success' });
+    setToasted(true);
+  }
+  if (deleteSlot.isSuccess && !toasted) {
     toast({ title: 'Updated', variant: 'success' });
     setToasted(true);
   }
