@@ -155,7 +155,7 @@ export function UserForm({ user }: { user: User }) {
       title: 'Error',
       variant: 'destructive',
       //@ts-ignore
-      description: useAddSupervisor.error?.response?.data?.error?.message || 'Something went wrong',
+      description: useAddSupervisor.error?.response?.data?.message || 'Something went wrong',
     });
     setToasted(true);
   }
@@ -173,7 +173,7 @@ export function UserForm({ user }: { user: User }) {
       title: 'Error',
       variant: 'destructive',
       //@ts-ignore
-      description: useAddAdmin.error?.response?.data?.error?.message || 'Something went wrong',
+      description: useAddAdmin.error?.response?.data?.message || 'Something went wrong',
     });
     setToasted(true);
   }

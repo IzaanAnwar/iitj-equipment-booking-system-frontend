@@ -81,6 +81,10 @@ export function SupervisorList({ user }: { user: User }) {
       header: 'Phone',
     },
     {
+      accessorKey: 'amount',
+      header: 'Amount',
+    },
+    {
       accessorKey: 'department.name',
       header: 'Department',
     },

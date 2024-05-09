@@ -76,6 +76,13 @@ export function LoginCard() {
     });
     setToasted(true);
   }
+  if (useForgotPassword.isError && !toasted) {
+    toast({
+      title: 'Email not sent',
+      variant: 'destructive',
+    });
+    setToasted(true);
+  }
 
   return (
     <Card className="w-full space-y-3 px-8 py-4 md:max-w-[80%] lg:max-w-[70%] ">
@@ -141,7 +148,7 @@ export function LoginCard() {
               console.log('mut');
             }}
           >
-            Forgot Password?
+            {useForgotPassword.isPending ? 'Sending...' : 'Forgot Password?'}
           </Link>
         </form>
         <div className="order-1 col-span-1 max-h-full  overflow-clip md:order-2">

@@ -106,10 +106,18 @@ export function EquipmentForm() {
     mutationFn: async (data: EquipmentFormValues) => {
       const equimentSlotCategories: { type: string; cost: number; startTime: string; endTime: string }[] = [];
       for (const category of equipmentSlots) {
+        let cost: number | undefined = 0;
+        if (category.type === 'DAY') {
+          cost = daySlotCost;
+        } else if (category.type === 'EVENING') {
+          cost = eveningSlotCost;
+        } else if (category.type === 'NIGHT') {
+          cost = nightSlotCost;
+        }
         if (category && category?.type) {
           equimentSlotCategories.push({
             type: category.type,
-            cost: daySlotCost!,
+            cost: cost || 0,
             startTime: category.startTime!,
             endTime: category.endTime!,
           });

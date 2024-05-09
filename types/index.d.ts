@@ -87,6 +87,7 @@ export type Supervisor = {
     name: string;
   } | null;
   role: 'supervisor' | null;
+  amount?: number;
 };
 
 export interface IEvent {
