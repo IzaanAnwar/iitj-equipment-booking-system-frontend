@@ -32,7 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
 export default function EditEquipment({ params }: { params: { equipmentId: string } }) {
+  const router = useRouter();
   const [name, setName] = useState<string>('');
   const [place, setPlace] = useState<string>('');
   const [disableMorningEnd, setDisableMorningEnd] = useState<number>(0);
@@ -107,7 +109,10 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
 
       return res.data;
     },
-    onSuccess: () => equipment.refetch(),
+    onSuccess: () => {
+      router.refresh();
+      equipment.refetch();
+    },
   });
   const updateCost = useMutation({
     mutationKey: ['update-slot-cost', slotTypeSel],
@@ -123,7 +128,10 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
 
       return res.data;
     },
-    onSuccess: () => equipment.refetch(),
+    onSuccess: () => {
+      router.refresh();
+      equipment.refetch();
+    },
   });
   const updateEquipmetnDetails = useMutation({
     mutationKey: ['update-equipment-details', params.equipmentId],
@@ -136,8 +144,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
           let cost: number | undefined = 0;
           if (category?.type === 'MORNING') {
             cost = morningSlotCost;
-          }
-          else if (category?.type === 'DAY') {
+          } else if (category?.type === 'DAY') {
             cost = daySlotCost;
           } else if (category?.type === 'EVENING') {
             cost = eveningSlotCost;
@@ -174,7 +181,10 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
         throw new Error(error);
       }
     },
-    onSuccess: () => equipment.refetch(),
+    onSuccess: () => {
+      router.refresh();
+      equipment.refetch();
+    },
   });
 
   const disabledTimeMorning = useCallback(
@@ -386,8 +396,8 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                 .map((data) => {
                   return (
                     <p key={data.id}>
-                      <strong>{(data.slotType === "MORNING" ? 'EARLY MORNING': data.slotType)}</strong> {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)} at{' '}
-                      {data?.slotCost} credit
+                      <strong>{data.slotType === 'MORNING' ? 'EARLY MORNING' : data.slotType}</strong>{' '}
+                      {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)} at {data?.slotCost} credit
                     </p>
                   );
                 })}
@@ -491,7 +501,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     {equipment.data?.slots?.map((n) => {
                       return (
                         <SelectItem key={n.id} value={n.id}>
-                          {n.slotType === "MORNING" ? "EARLY MORNING" : n.slotType}
+                          {n.slotType === 'MORNING' ? 'EARLY MORNING' : n.slotType}
                         </SelectItem>
                       );
                     })}
@@ -555,8 +565,8 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     setEquipmentSlots((prevSlots) => {
                       const updatedSlots = [...prevSlots];
 
-                      updatedSlots[0] = {
-                        ...updatedSlots[0],
+                      updatedSlots[1] = {
+                        ...updatedSlots[1],
                         type: 'DAY',
                         startTime: val[0]?.format('HH:mm'),
                         endTime: val[1]?.format('HH:mm'),
@@ -589,8 +599,8 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
 
                     setEquipmentSlots((prevSlots) => {
                       const updatedSlots = [...prevSlots!];
-                      updatedSlots[1] = {
-                        ...updatedSlots[1],
+                      updatedSlots[2] = {
+                        ...updatedSlots[2],
                         type: 'EVENING',
                         startTime: val[0]?.format('HH:mm'),
                         endTime: val[1]?.format('HH:mm'),
@@ -600,7 +610,6 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     setDisableEveStart(val[0]?.hour() || 23);
                     setDisableEveEnd(val[1]?.hour() || 23);
                     setDisableNightStart(val[1]?.hour() || 23);
-
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
@@ -623,16 +632,15 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   onChange={(val) => {
                     setEquipmentSlots((prevSlots) => {
                       const updatedSlots = [...prevSlots!];
-                      updatedSlots[2] = {
-                        ...updatedSlots[2],
+                      updatedSlots[3] = {
+                        ...updatedSlots[3],
                         type: 'NIGHT',
                         startTime: val[0]?.format('HH:mm'),
                         endTime: val[1]?.format('HH:mm'),
                       };
                       return updatedSlots;
                     });
-                    setDisableEveEnd(val[0]?.hour() || 24)
-
+                    setDisableEveEnd(val[0]?.hour() || 24);
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />

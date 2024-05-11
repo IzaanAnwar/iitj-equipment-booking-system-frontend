@@ -121,6 +121,7 @@ function EquipmentCard({ equipment }: { equipment: Equipment }) {
                   <strong>{moment.utc(slot.startTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
                   <p>to</p>
                   <strong>{moment.utc(slot.endTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
+                  <p>at <strong>₹ {slot.slotCost} </strong></p>
                 </div>
               );
             })}

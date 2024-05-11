@@ -138,6 +138,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       throw new Error(await res.data);
       // throw new Error('seome');
     },
+   onSuccess:() => router.refresh() 
   });
 
   const hanldeSelectSlot = useCallback(

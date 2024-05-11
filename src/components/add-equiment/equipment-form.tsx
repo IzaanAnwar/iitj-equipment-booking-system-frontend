@@ -125,8 +125,7 @@ export function EquipmentForm() {
         let cost: number | undefined = 0;
         if (category.type === 'MORNING') {
           cost = morningSlotCost;
-        } 
-        else if (category.type === 'DAY') {
+        } else if (category.type === 'DAY') {
           cost = daySlotCost;
         } else if (category.type === 'EVENING') {
           cost = eveningSlotCost;
@@ -166,6 +165,8 @@ export function EquipmentForm() {
       }
     },
   });
+  console.log({equipmentSlots});
+  
   const disabledTimeMorning = useCallback(
     (current: Dayjs) => {
       return {
@@ -399,229 +400,245 @@ export function EquipmentForm() {
               <FormLabel>Lab Hours</FormLabel>
               <FormControl>
                 <>
-                  <div className="flex w-full items-center justify-between gap-4">
+                  <div className='border rounded px-2 py-4 space-y-2'>
+                    {showMorningPicker && <Label className="block w-full">Early Morning Slot Slot</Label>}
+
+                    <div className="flex w-full items-center justify-between gap-4">
+                      {showMorningPicker && (
+                        <>
+                          <TimePicker.RangePicker
+                            format={'HH-mm'}
+                            disabledTime={disabledTimeMorning}
+                            onSelectCapture={field.onChange}
+                            onChange={(val) => {
+                              console.log({ val: val });
+
+                              setEquipmentSlots((prevSlots) => {
+                                const updatedSlots = [...prevSlots];
+
+                                updatedSlots[0] = {
+                                  ...updatedSlots[0],
+                                  type: 'MORNING',
+                                  startTime: val[0]?.format('HH:mm'),
+                                  endTime: val[1]?.format('HH:mm'),
+                                };
+                                return updatedSlots;
+                              });
+                              setDisableDayEnd(val[1]?.hour() || 23);
+                              setDisableMorningEnd(val[1]?.hour() || 23);
+                            }}
+                            className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </>
+                      )}
+                      {showMorningPicker ? (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => removeSlot('MORNING')}
+                          variant="destructive"
+                          className="animate-fade-right animate-duration-200"
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => handleAddSlot('MORNING')}
+                          className="w-full animate-fade-left animate-duration-200"
+                          variant="outline"
+                        >
+                          Add Early Morning Slot
+                        </Button>
+                      )}
+                    </div>
                     {showMorningPicker && (
-                      <>
-                        <TimePicker.RangePicker
-                          format={'HH-mm'}
-                          disabledTime={disabledTimeMorning}
-                          onSelectCapture={field.onChange}
-                          onChange={(val) => {
-                            console.log({ val: val });
-
-                            setEquipmentSlots((prevSlots) => {
-                              const updatedSlots = [...prevSlots];
-
-                              updatedSlots[0] = {
-                                ...updatedSlots[0],
-                                type: 'MORNING',
-                                startTime: val[0]?.format('HH:mm'),
-                                endTime: val[1]?.format('HH:mm'),
-                              };
-                              return updatedSlots;
-                            });
-                            setDisableDayEnd(val[1]?.hour() || 23);
-                            setDisableMorningEnd(val[1]?.hour() || 23);
-                          }}
-                          className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                        <Label>Usage Charge Per Slot</Label>
+                        <Input
+                          type="number"
+                          placeholder="eg: 1"
+                          value={morningSlotCost}
+                          onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
                         />
-                      </>
-                    )}
-                    {showMorningPicker ? (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => removeSlot('MORNING')}
-                        variant="destructive"
-                        className="animate-fade-right animate-duration-200"
-                      >
-                        Remove
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => handleAddSlot('MORNING')}
-                        className="w-full animate-fade-left animate-duration-200"
-                        variant="outline"
-                      >
-                        Add Early Morning Slot
-                      </Button>
+                      </div>
                     )}
                   </div>
-                  {showMorningPicker && (
-                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                      <Label>Usage Charge Per Slot</Label>
-                      <Input
-                        type="number"
-                        placeholder="eg: 1"
-                        value={morningSlotCost}
-                        onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
-                      />
+                  <div className='border rounded px-2 py-4 space-y-2'>
+                    {showDayPicker && <Label>Day Slot</Label>}
+
+                    <div className="flex w-full items-center justify-between gap-4">
+                      {showDayPicker && (
+                        <>
+                          <TimePicker.RangePicker
+                            format={'HH-mm'}
+                            disabledTime={disabledTimeDay}
+                            onSelectCapture={field.onChange}
+                            onChange={(val) => {
+                              console.log({ val: val });
+
+                              setEquipmentSlots((prevSlots) => {
+                                const updatedSlots = [...prevSlots];
+
+                                updatedSlots[1] = {
+                                  ...updatedSlots[1],
+                                  type: 'DAY',
+                                  startTime: val[0]?.format('HH:mm'),
+                                  endTime: val[1]?.format('HH:mm'),
+                                };
+                                return updatedSlots;
+                              });
+                              setDisableDayStart(val[0]?.hour() || 23);
+                              setDisableDayEnd(val[1]?.hour() || 23);
+                            }}
+                            className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </>
+                      )}
+                      {showDayPicker ? (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => removeSlot('DAY')}
+                          variant="destructive"
+                          className="animate-fade-right animate-duration-200"
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => handleAddSlot('DAY')}
+                          className="w-full animate-fade-left animate-duration-200"
+                          variant="outline"
+                        >
+                          Add Day Slot
+                        </Button>
+                      )}
                     </div>
-                  )}
-                  <div className="flex w-full items-center justify-between gap-4">
                     {showDayPicker && (
-                      <>
+                      <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                        <Label>Usage Charge Per Slot</Label>
+                        <Input
+                          type="number"
+                          placeholder="eg: 1"
+                          value={daySlotCost}
+                          onChange={(e) => setDaySlotCost(parseInt(e.target.value))}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className='border rounded px-2 py-4 space-y-2'>
+                    {showEveningPicker && <Label>Evening Slot</Label>}
+
+                    <div className="flex w-full items-center justify-between gap-4">
+                      {showEveningPicker && (
                         <TimePicker.RangePicker
-                          format={'HH-mm'}
-                          disabledTime={disabledTimeDay}
-                          onSelectCapture={field.onChange}
+                          disabledTime={disabledTimeEvening}
+                          format={'HH:mm'}
                           onChange={(val) => {
-                            console.log({ val: val });
+                            console.log({ val, vale: val[1] });
 
                             setEquipmentSlots((prevSlots) => {
-                              const updatedSlots = [...prevSlots];
-
-                              updatedSlots[0] = {
-                                ...updatedSlots[0],
-                                type: 'DAY',
+                              const updatedSlots = [...prevSlots!];
+                              updatedSlots[2] = {
+                                ...updatedSlots[2],
+                                type: 'EVENING',
                                 startTime: val[0]?.format('HH:mm'),
                                 endTime: val[1]?.format('HH:mm'),
                               };
                               return updatedSlots;
                             });
-                            setDisableDayStart(val[0]?.hour() || 23);
-                            setDisableDayEnd(val[1]?.hour() || 23);
+                            setDisableEveStart(val[0]?.hour() || 23);
+                            setDisableEveEnd(val[1]?.hour() || 23);
+                            setDisableNightStart(val[1]?.hour() || 23);
                           }}
                           className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         />
-                      </>
-                    )}
-                    {showDayPicker ? (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => removeSlot('DAY')}
-                        variant="destructive"
-                        className="animate-fade-right animate-duration-200"
-                      >
-                        Remove
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => handleAddSlot('DAY')}
-                        className="w-full animate-fade-left animate-duration-200"
-                        variant="outline"
-                      >
-                        Add Day Slot
-                      </Button>
-                    )}
-                  </div>
-                  {showDayPicker && (
-                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                      <Label>Usage Charge Per Slot</Label>
-                      <Input
-                        type="number"
-                        placeholder="eg: 1"
-                        value={daySlotCost}
-                        onChange={(e) => setDaySlotCost(parseInt(e.target.value))}
-                      />
+                      )}
+                      {showEveningPicker ? (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => removeSlot('EVE')}
+                          variant="destructive"
+                          className="animate-fade-right animate-duration-200"
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => handleAddSlot('EVE')}
+                          className="w-full animate-fade-left animate-duration-200"
+                          variant="outline"
+                        >
+                          Add Evening Slot
+                        </Button>
+                      )}
                     </div>
-                  )}
-                  <div className="flex w-full items-center justify-between gap-4">
                     {showEveningPicker && (
-                      <TimePicker.RangePicker
-                        disabledTime={disabledTimeEvening}
-                        format={'HH:mm'}
-                        onChange={(val) => {
-                          console.log({ val, vale: val[1] });
-
-                          setEquipmentSlots((prevSlots) => {
-                            const updatedSlots = [...prevSlots!];
-                            updatedSlots[1] = {
-                              ...updatedSlots[1],
-                              type: 'EVENING',
-                              startTime: val[0]?.format('HH:mm'),
-                              endTime: val[1]?.format('HH:mm'),
-                            };
-                            return updatedSlots;
-                          });
-                          setDisableEveStart(val[0]?.hour() || 23);
-                          setDisableEveEnd(val[1]?.hour() || 23);
-                          setDisableNightStart(val[1]?.hour() || 23);
-
-                        }}
-                        className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      />
-                    )}
-                    {showEveningPicker ? (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => removeSlot('EVE')}
-                        variant="destructive"
-                        className="animate-fade-right animate-duration-200"
-                      >
-                        Remove
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => handleAddSlot('EVE')}
-                        className="w-full animate-fade-left animate-duration-200"
-                        variant="outline"
-                      >
-                        Add Evening Slot
-                      </Button>
+                      <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                        <Label>Usage Charge Per Slot</Label>
+                        <Input
+                          type="number"
+                          placeholder="eg: 1"
+                          value={eveningSlotCost}
+                          onChange={(e) => setEveningSlotCost(parseInt(e.target.value))}
+                        />
+                      </div>
                     )}
                   </div>
-                  {showEveningPicker && (
-                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                      <Label>Usage Charge Per Slot</Label>
-                      <Input
-                        type="number"
-                        placeholder="eg: 1"
-                        value={eveningSlotCost}
-                        onChange={(e) => setEveningSlotCost(parseInt(e.target.value))}
-                      />
+
+                  <div className='border rounded px-2 py-4 space-y-2'>
+                    {showNightPicker && <Label>Night Slot</Label>}
+                    <div className="flex w-full items-center justify-between gap-4">
+                      {showNightPicker && (
+                        <TimePicker.RangePicker
+                          disabledTime={disabledTimeNight}
+                          format={'HH-mm'}
+                          onChange={(val) => {
+                            setEquipmentSlots((prevSlots) => {
+                              const updatedSlots = [...prevSlots!];
+                              updatedSlots[3] = {
+                                ...updatedSlots[3],
+                                type: 'NIGHT',
+                                startTime: val[0]?.format('HH:mm'),
+                                endTime: val[1]?.format('HH:mm'),
+                              };
+                              return updatedSlots;
+                            });
+                            setDisableEveEnd(val[0]?.hour() || 24);
+                          }}
+                          className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                      )}
+                      {showNightPicker ? (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => removeSlot('NIGHT')}
+                          variant="destructive"
+                          className="animate-fade-right animate-duration-200"
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => handleAddSlot('NIGHT')}
+                          className="w-full animate-fade-left animate-duration-200"
+                          variant="outline"
+                        >
+                          Add Night Slot
+                        </Button>
+                      )}
                     </div>
-                  )}
-                  <div className="flex w-full items-center justify-between gap-4">
-                    {showNightPicker && (
-                      <TimePicker.RangePicker
-                        disabledTime={disabledTimeNight}
-                        format={'HH-mm'}
-                        onChange={(val) => {
-                          setEquipmentSlots((prevSlots) => {
-                            const updatedSlots = [...prevSlots!];
-                            updatedSlots[2] = {
-                              ...updatedSlots[2],
-                              type: 'NIGHT',
-                              startTime: val[0]?.format('HH:mm'),
-                              endTime: val[1]?.format('HH:mm'),
-                            };
-                            return updatedSlots;
-                          });
-                          setDisableEveEnd(val[0]?.hour() || 24)
-                        }}
-                        className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      />
-                    )}
-                    {showNightPicker ? (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => removeSlot('NIGHT')}
-                        variant="destructive"
-                        className="animate-fade-right animate-duration-200"
-                      >
-                        Remove
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() => handleAddSlot('NIGHT')}
-                        className="w-full animate-fade-left animate-duration-200"
-                        variant="outline"
-                      >
-                        Add Night Slot
-                      </Button>
-                    )}
                   </div>
                   {showNightPicker && (
                     <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">

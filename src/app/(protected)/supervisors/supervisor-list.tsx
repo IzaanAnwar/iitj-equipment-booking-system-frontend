@@ -50,6 +50,7 @@ export function SupervisorList({ user }: { user: User }) {
       }
       return res.data;
     },
+    onSuccess: () => allSupervisors.refetch(),
   });
 
   const columns: ColumnDef<Supervisor>[] = [
