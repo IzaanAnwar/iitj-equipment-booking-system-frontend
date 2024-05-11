@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { api } from '@/utils/axios-instance';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
@@ -52,8 +52,15 @@ type EquipmentFormValues = z.infer<typeof equipmentFormSchema>;
 export function EquipmentForm() {
   const [toasted, setToasted] = useState<boolean>(false);
   const [slots, setSlots] = useState(['DAY']);
+  const [disableMorningEnd, setDisableMorningEnd] = useState<number>(0);
+  const [disableDayStart, setDisableDayStart] = useState<number>(24);
+  const [disableDayEnd, setDisableDayEnd] = useState<number>(0);
+  const [disableEveStart, setDisableEveStart] = useState<number>(24);
+  const [disableEveEnd, setDisableEveEnd] = useState<number>(24);
+  const [disableNightStart, setDisableNightStart] = useState<number>(0);
   const [showEveningPicker, setShowEveningPicker] = useState(false);
   const [showDayPicker, setShowDayPicker] = useState(false);
+  const [showMorningPicker, setShowMorningPicker] = useState(false);
   const [showNightPicker, setShowNightPicker] = useState(false);
   const [equipmentSlots, setEquipmentSlots] = useState<
     {
@@ -63,14 +70,18 @@ export function EquipmentForm() {
     }[]
   >([]);
   const [daySlotCost, setDaySlotCost] = useState<number>();
+  const [morningSlotCost, setMorningSlotCost] = useState<number>();
   const [eveningSlotCost, setEveningSlotCost] = useState<number>();
   const [nightSlotCost, setNightSlotCost] = useState<number>();
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentFormSchema),
     mode: 'onChange',
   });
-  function handleAddSlot(type: 'DAY' | 'EVE' | 'NIGHT') {
-    if (type === 'DAY') {
+  function handleAddSlot(type: 'MORNING' | 'DAY' | 'EVE' | 'NIGHT') {
+    if (type === 'MORNING') {
+      setSlots([...slots, 'MORNING']);
+      setShowMorningPicker(true);
+    } else if (type === 'DAY') {
       setSlots([...slots, 'DAY']);
       setShowDayPicker(true);
     } else if (type === 'EVE') {
@@ -82,19 +93,24 @@ export function EquipmentForm() {
     }
   }
 
-  function removeSlot(type: 'DAY' | 'EVE' | 'NIGHT') {
-    if (type === 'DAY') {
-      setSlots(['DAY']);
+  function removeSlot(type: 'MORNING' | 'DAY' | 'EVE' | 'NIGHT') {
+    if (type === 'MORNING') {
+      setSlots(['MORNING']);
+      setShowMorningPicker(false);
+      const newState = equipmentSlots.filter((slotInfo) => slotInfo.type === 'MORNING');
+      setEquipmentSlots(newState);
+    } else if (type === 'DAY') {
+      setSlots(['MORNING']);
       setShowDayPicker(false);
       const newState = equipmentSlots.filter((slotInfo) => slotInfo.type === 'DAY');
       setEquipmentSlots(newState);
     } else if (type === 'EVE') {
-      setSlots(['DAY']);
+      setSlots(['MORNING', 'DAY']);
       setShowEveningPicker(false);
       const newState = equipmentSlots.filter((slotInfo) => slotInfo.type === 'EVENING');
       setEquipmentSlots(newState);
     } else if (type === 'NIGHT') {
-      setSlots(['DAY', 'EVENING']);
+      setSlots(['MORNING', 'DAY', 'EVENING']);
       setShowNightPicker(false);
       const newState = equipmentSlots.filter((slotInfo) => slotInfo.type === 'NIGHT');
       setEquipmentSlots(newState);
@@ -107,7 +123,10 @@ export function EquipmentForm() {
       const equimentSlotCategories: { type: string; cost: number; startTime: string; endTime: string }[] = [];
       for (const category of equipmentSlots) {
         let cost: number | undefined = 0;
-        if (category.type === 'DAY') {
+        if (category.type === 'MORNING') {
+          cost = morningSlotCost;
+        } 
+        else if (category.type === 'DAY') {
           cost = daySlotCost;
         } else if (category.type === 'EVENING') {
           cost = eveningSlotCost;
@@ -147,45 +166,71 @@ export function EquipmentForm() {
       }
     },
   });
-  const disabledTimeDay = (current: Dayjs) => {
-    return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 0 || i > 17) {
-            hours.push(i);
+  const disabledTimeMorning = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            if (i < 0 || i > disableDayStart) {
+              hours.push(i);
+            }
           }
-        }
-        return hours;
-      },
-    };
-  };
-  const disabledTimeEvening = (current: Dayjs) => {
-    return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 18 || i > 20) {
-            hours.push(i);
+          return hours;
+        },
+      };
+    },
+    [disableDayStart],
+  );
+  const disabledTimeDay = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            if (i < disableMorningEnd || i > disableEveStart) {
+              hours.push(i);
+            }
           }
-        }
-        return hours;
-      },
-    };
-  };
-  const disabledTimeNight = (current: Dayjs) => {
-    return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 21 || i > 24) {
-            hours.push(i);
+          return hours;
+        },
+      };
+    },
+    [disableEveStart, disableMorningEnd],
+  );
+  const disabledTimeEvening = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            24;
+            if (i < disableDayEnd || i > disableEveEnd) {
+              hours.push(i);
+            }
           }
-        }
-        return hours;
-      },
-    };
-  };
+          return hours;
+        },
+      };
+    },
+    [disableDayEnd, disableEveEnd],
+  );
+  const disabledTimeNight = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            if (i < disableNightStart || i > 24) {
+              hours.push(i);
+            }
+          }
+          return hours;
+        },
+      };
+    },
+    [disableNightStart],
+  );
 
   function onSubmit(data: EquipmentFormValues) {
     console.log({ data, equipmentSlots });
@@ -355,10 +400,71 @@ export function EquipmentForm() {
               <FormControl>
                 <>
                   <div className="flex w-full items-center justify-between gap-4">
+                    {showMorningPicker && (
+                      <>
+                        <TimePicker.RangePicker
+                          format={'HH-mm'}
+                          disabledTime={disabledTimeMorning}
+                          onSelectCapture={field.onChange}
+                          onChange={(val) => {
+                            console.log({ val: val });
+
+                            setEquipmentSlots((prevSlots) => {
+                              const updatedSlots = [...prevSlots];
+
+                              updatedSlots[0] = {
+                                ...updatedSlots[0],
+                                type: 'MORNING',
+                                startTime: val[0]?.format('HH:mm'),
+                                endTime: val[1]?.format('HH:mm'),
+                              };
+                              return updatedSlots;
+                            });
+                            setDisableDayEnd(val[1]?.hour() || 23);
+                            setDisableMorningEnd(val[1]?.hour() || 23);
+                          }}
+                          className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                      </>
+                    )}
+                    {showMorningPicker ? (
+                      <Button
+                        size="sm"
+                        type="button"
+                        onClick={() => removeSlot('MORNING')}
+                        variant="destructive"
+                        className="animate-fade-right animate-duration-200"
+                      >
+                        Remove
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        type="button"
+                        onClick={() => handleAddSlot('MORNING')}
+                        className="w-full animate-fade-left animate-duration-200"
+                        variant="outline"
+                      >
+                        Add Early Morning Slot
+                      </Button>
+                    )}
+                  </div>
+                  {showMorningPicker && (
+                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                      <Label>Usage Charge Per Slot</Label>
+                      <Input
+                        type="number"
+                        placeholder="eg: 1"
+                        value={morningSlotCost}
+                        onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
+                      />
+                    </div>
+                  )}
+                  <div className="flex w-full items-center justify-between gap-4">
                     {showDayPicker && (
                       <>
                         <TimePicker.RangePicker
-                          format={'hh-mm'}
+                          format={'HH-mm'}
                           disabledTime={disabledTimeDay}
                           onSelectCapture={field.onChange}
                           onChange={(val) => {
@@ -375,6 +481,8 @@ export function EquipmentForm() {
                               };
                               return updatedSlots;
                             });
+                            setDisableDayStart(val[0]?.hour() || 23);
+                            setDisableDayEnd(val[1]?.hour() || 23);
                           }}
                           className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         />
@@ -431,6 +539,10 @@ export function EquipmentForm() {
                             };
                             return updatedSlots;
                           });
+                          setDisableEveStart(val[0]?.hour() || 23);
+                          setDisableEveEnd(val[1]?.hour() || 23);
+                          setDisableNightStart(val[1]?.hour() || 23);
+
                         }}
                         className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       />
@@ -472,7 +584,7 @@ export function EquipmentForm() {
                     {showNightPicker && (
                       <TimePicker.RangePicker
                         disabledTime={disabledTimeNight}
-                        format={'hh-mm'}
+                        format={'HH-mm'}
                         onChange={(val) => {
                           setEquipmentSlots((prevSlots) => {
                             const updatedSlots = [...prevSlots!];
@@ -484,6 +596,7 @@ export function EquipmentForm() {
                             };
                             return updatedSlots;
                           });
+                          setDisableEveEnd(val[0]?.hour() || 24)
                         }}
                         className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       />

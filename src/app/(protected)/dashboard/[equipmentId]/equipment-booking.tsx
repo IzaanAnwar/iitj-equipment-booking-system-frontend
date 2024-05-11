@@ -160,6 +160,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       });
 
       const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
+      const isTodayOrPast = moment(startTime).isSameOrBefore(moment(), 'day');
       const now = moment();
       if (bookingExists?.id || !isTodayOrFuture) return;
       if (user?.role === 'user' && isWeekend) {
@@ -185,14 +186,15 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         startMin: parsteStrTimeToInt(userSelectedSlot?.startTime)[1],
         slotDuration: equipment.data?.slotDuration!,
       });
-      if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
-        toast({
-          title: 'Equipment not available for booking',
-          description: 'You are selecting a past date or time',
-        });
-        return;
+      if (isTodayOrPast) {
+        if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
+          toast({
+            title: 'Equipment not available for booking',
+            description: 'You are selecting a past date or time',
+          });
+          return;
+        }
       }
-
       setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: userSelectedSlot.slotCost });
       setdailogOpen(true);
     },
@@ -441,9 +443,10 @@ function addISTOffset(utcDate: Date) {
 
 function findStartAndEnd(slotInfo: Slot[]) {
   const mapping = {
-    DAY: 0,
-    EVENING: 1,
-    NIGHT: 2,
+    MORNING: 0,
+    DAY: 1,
+    EVENING: 2,
+    NIGHT: 3,
   };
   const sortedArray = slotInfo.sort((a, b) => mapping[a.slotType] - mapping[b.slotType]);
 

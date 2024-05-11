@@ -100,30 +100,30 @@ function EquipmentCard({ equipment }: { equipment: Equipment }) {
       <CardContent>
         <CardDescription className="">
           <strong>Lab Hours</strong>
-          {equipment.slots.map((slot) => {
-            const starTime = new Date(slot.startTime)?.toLocaleTimeString('en-IN', {
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true,
-              timeZone: 'Asia/Kolkata',
-            });
-            const endTime = new Date(slot.endTime)?.toLocaleTimeString('en-IN', {
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true,
-              timeZone: 'Asia/Kolkata',
-            });
-            console.log({ typeof: typeof slot.startTime });
+          {equipment.slots.sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime))?.map((slot) => {
+              const starTime = new Date(slot.startTime)?.toLocaleTimeString('en-IN', {
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true,
+                timeZone: 'Asia/Kolkata',
+              });
+              const endTime = new Date(slot.endTime)?.toLocaleTimeString('en-IN', {
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true,
+                timeZone: 'Asia/Kolkata',
+              });
+              console.log({ typeof: typeof slot.startTime });
 
-            return (
-              <div key={slot.id} className="flex items-center justify-start gap-4">
-                <p>{slot.slotType}</p>:{' '}
-                <strong>{moment.utc(slot.startTime, 'HH:mm:ss.SSSSSS').format('hh:mm a')}</strong>
-                <p>to</p>
-                <strong>{moment.utc(slot.endTime, 'HH:mm:ss.SSSSSS').format('hh:mm a')}</strong>
-              </div>
-            );
-          })}
+              return (
+                <div key={slot.id} className="flex items-center justify-start gap-4">
+                  <p>{(slot.slotType === "MORNING" ? "EARLY MORNING":slot.slotType)}</p>:{' '}
+                  <strong>{moment.utc(slot.startTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
+                  <p>to</p>
+                  <strong>{moment.utc(slot.endTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
+                </div>
+              );
+            })}
         </CardDescription>
       </CardContent>
       <CardFooter>

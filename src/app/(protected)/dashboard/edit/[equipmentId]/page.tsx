@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useGetEquipment } from '@/hooks/use-equipments';
 import { api } from '@/utils/axios-instance';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { EquipmentWithMaintenanceLogs } from '../../../../../../types';
 import { toast } from '@/components/ui/use-toast';
 import { Modal, TimePicker } from 'antd';
@@ -35,6 +35,12 @@ import {
 export default function EditEquipment({ params }: { params: { equipmentId: string } }) {
   const [name, setName] = useState<string>('');
   const [place, setPlace] = useState<string>('');
+  const [disableMorningEnd, setDisableMorningEnd] = useState<number>(0);
+  const [disableDayStart, setDisableDayStart] = useState<number>(24);
+  const [disableDayEnd, setDisableDayEnd] = useState<number>(0);
+  const [disableEveStart, setDisableEveStart] = useState<number>(24);
+  const [disableEveEnd, setDisableEveEnd] = useState<number>(24);
+  const [disableNightStart, setDisableNightStart] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const [slotTypeSel, setSlotTypeSel] = useState('');
   const [updateSlotPrice, setUpdateSlotPrice] = useState<string>();
@@ -46,6 +52,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
       endTime: string | undefined | null;
     }[]
   >([]);
+  const [morningSlotCost, setMorningSlotCost] = useState<number>();
   const [daySlotCost, setDaySlotCost] = useState<number>();
   const [slotDuration, setSlotDuration] = useState<string>();
   const [eveningSlotCost, setEveningSlotCost] = useState<number>();
@@ -127,7 +134,10 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
         const equimentSlotCategories: { type: string; cost: number; startTime: string; endTime: string }[] = [];
         for (const category of equipmentSlots) {
           let cost: number | undefined = 0;
-          if (category?.type === 'DAY') {
+          if (category?.type === 'MORNING') {
+            cost = morningSlotCost;
+          }
+          else if (category?.type === 'DAY') {
             cost = daySlotCost;
           } else if (category?.type === 'EVENING') {
             cost = eveningSlotCost;
@@ -167,45 +177,72 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
     onSuccess: () => equipment.refetch(),
   });
 
-  const disabledTimeDay = (current: Dayjs) => {
-    return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 0 || i > 17) {
-            hours.push(i);
+  const disabledTimeMorning = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            if (i < 0 || i > disableDayStart) {
+              hours.push(i);
+            }
           }
-        }
-        return hours;
-      },
-    };
-  };
-  const disabledTimeEvening = (current: Dayjs) => {
-    return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 18 || i > 20) {
-            hours.push(i);
+          return hours;
+        },
+      };
+    },
+    [disableDayStart],
+  );
+  const disabledTimeDay = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            if (i < disableMorningEnd || i > disableEveStart) {
+              hours.push(i);
+            }
           }
-        }
-        return hours;
-      },
-    };
-  };
-  const disabledTimeNight = (current: Dayjs) => {
-    return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 21 || i > 24) {
-            hours.push(i);
+          return hours;
+        },
+      };
+    },
+    [disableEveStart, disableMorningEnd],
+  );
+  const disabledTimeEvening = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            24;
+            if (i < disableDayEnd || i > disableEveEnd) {
+              hours.push(i);
+            }
           }
-        }
-        return hours;
-      },
-    };
-  };
+          return hours;
+        },
+      };
+    },
+    [disableDayEnd, disableEveEnd],
+  );
+  const disabledTimeNight = useCallback(
+    (current: Dayjs) => {
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < 24; i++) {
+            if (i < disableNightStart || i > 24) {
+              hours.push(i);
+            }
+          }
+          return hours;
+        },
+      };
+    },
+    [disableNightStart],
+  );
+
   if (equipment.isPending) {
     return (
       <div className="h-screen w-full space-y-4 px-2 py-12 md:px-10 lg:px-20">
@@ -349,7 +386,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                 .map((data) => {
                   return (
                     <p key={data.id}>
-                      <strong>{data.slotType}</strong> {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)} at{' '}
+                      <strong>{(data.slotType === "MORNING" ? 'EARLY MORNING': data.slotType)}</strong> {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)} at{' '}
                       {data?.slotCost} credit
                     </p>
                   );
@@ -454,7 +491,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     {equipment.data?.slots?.map((n) => {
                       return (
                         <SelectItem key={n.id} value={n.id}>
-                          {n.slotType}
+                          {n.slotType === "MORNING" ? "EARLY MORNING" : n.slotType}
                         </SelectItem>
                       );
                     })}
@@ -472,11 +509,45 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
           {openSlotModal === 'mod' && (
             <div className="max-w-[60%]  animate-fade-down space-y-3">
               <Label>Note: Atleast details of one slot should be modified</Label>
+              <div>
+                <Label>Early Morning Slot</Label>
+                <TimePicker.RangePicker
+                  format={'HH-mm'}
+                  disabledTime={disabledTimeMorning}
+                  onChange={(val) => {
+                    console.log({ val: val });
 
+                    setEquipmentSlots((prevSlots) => {
+                      const updatedSlots = [...prevSlots];
+
+                      updatedSlots[0] = {
+                        ...updatedSlots[0],
+                        type: 'MORNING',
+                        startTime: val[0]?.format('HH:mm'),
+                        endTime: val[1]?.format('HH:mm'),
+                      };
+                      return updatedSlots;
+                    });
+                    setDisableDayEnd(val[1]?.hour() || 23);
+                    setDisableMorningEnd(val[1]?.hour() || 23);
+                  }}
+                  className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                  <Label>Usage Charge Per Slot</Label>
+
+                  <Input
+                    type="number"
+                    placeholder="eg: 1 "
+                    value={morningSlotCost}
+                    onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
+                  />
+                </div>
+              </div>
               <div>
                 <Label>Day Slot</Label>
                 <TimePicker.RangePicker
-                  format={'hh-mm'}
+                  format={'HH-mm'}
                   disabledTime={disabledTimeDay}
                   onChange={(val) => {
                     console.log({ val: val });
@@ -492,6 +563,8 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                       };
                       return updatedSlots;
                     });
+                    setDisableDayStart(val[0]?.hour() || 23);
+                    setDisableDayEnd(val[1]?.hour() || 23);
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
@@ -524,6 +597,10 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                       };
                       return updatedSlots;
                     });
+                    setDisableEveStart(val[0]?.hour() || 23);
+                    setDisableEveEnd(val[1]?.hour() || 23);
+                    setDisableNightStart(val[1]?.hour() || 23);
+
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
@@ -542,7 +619,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                 <Label>Night Slot</Label>
                 <TimePicker.RangePicker
                   disabledTime={disabledTimeNight}
-                  format={'hh-mm'}
+                  format={'HH-mm'}
                   onChange={(val) => {
                     setEquipmentSlots((prevSlots) => {
                       const updatedSlots = [...prevSlots!];
@@ -554,6 +631,8 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                       };
                       return updatedSlots;
                     });
+                    setDisableEveEnd(val[0]?.hour() || 24)
+
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />

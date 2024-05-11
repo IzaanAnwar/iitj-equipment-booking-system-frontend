@@ -12,9 +12,9 @@ const generateExcel = (data: IReport[]) => {
       'Equipment Name': report.equipment.name,
       'Booked By': report.user.name,
       Status: report.status,
-      From: moment(report.slotTimeStart).tz('Asia/Kolkata').format('YY:MM:DD:hh:mm'),
-      To: moment(report.slotTimeEnd).tz('Asia/Kolkata').format('YY:MM:DD:hh:mm'),
-      'Booked At': moment(report.bookedAt!).tz('Asia/Kolkata').format('YY:MM:DD:hh:mm'),
+      From: moment(report.slotTimeStart).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
+      To: moment(report.slotTimeEnd).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
+      'Booked At': moment(report.bookedAt!).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
       Cost: report.cost,
       Remark: report.remark,
       Hours: report.slotDuration,
@@ -36,10 +36,10 @@ const generatePDF = (data: IReport[]) => {
   const formattedData = data.map((report) => [
     report.equipment.name,
     report.user.name,
-    moment(report.bookedAt!).tz('Asia/Kolkata').format('YY:MM:DD:hh:mm'),
+    moment(report.bookedAt!).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
     report.cost.toString(), // Convert cost to string
-    moment(report.slotTimeStart).tz('Asia/Kolkata').format('YY:MM:DD:hh:mm'),
-    moment(report.slotTimeEnd).tz('Asia/Kolkata').format('YY:MM:DD:hh:mm'),
+    moment(report.slotTimeStart).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
+    moment(report.slotTimeEnd).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
     report.status,
   ]);
   doc.autoTable({

@@ -78,7 +78,7 @@ export const columns: ColumnDef<IReport>[] = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const isDesktop = useMediaQuery('(min-width:1000px)');
       if (isDesktop) {
-        return <div className="text-center">{moment(data).format('MMMM Do YYYY, h:mm:ss a')}</div>;
+        return <div className="text-center">{moment(data).format('MMMM Do YYYY, HH:mm:ss')}</div>;
       }
     },
   },
@@ -97,7 +97,7 @@ export const columns: ColumnDef<IReport>[] = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const isDesktop = useMediaQuery('(min-width:1000px)');
       if (isDesktop) {
-        return <div className="text-center">{moment(data).format('MMMM Do YYYY, h:mm:ss a')}</div>;
+        return <div className="text-center">{moment(data).format('MMMM Do YYYY, HH:mm:ss')}</div>;
       }
     },
   },
