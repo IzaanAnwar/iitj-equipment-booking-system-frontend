@@ -165,8 +165,8 @@ export function EquipmentForm() {
       }
     },
   });
-  console.log({equipmentSlots});
-  
+  console.log({ equipmentSlots });
+
   const disabledTimeMorning = useCallback(
     (current: Dayjs) => {
       return {
@@ -383,6 +383,13 @@ export function EquipmentForm() {
                       <SelectItem value={'1'}>1 hr</SelectItem>
                       <SelectItem value={'2'}>2 hr</SelectItem>
                       <SelectItem value={'3'}>3 hr</SelectItem>
+                      <SelectItem value={'4'}>4 hr</SelectItem>
+                      <SelectItem value={'5'}>5 hr</SelectItem>
+                      <SelectItem value={'6'}>6 hr</SelectItem>
+                      <SelectItem value={'7'}>7 hr</SelectItem>
+                      <SelectItem value={'8'}>8 hr</SelectItem>
+                      <SelectItem value={'9'}>9 hr</SelectItem>
+                      <SelectItem value={'10'}>10 hr</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -400,7 +407,7 @@ export function EquipmentForm() {
               <FormLabel>Lab Hours</FormLabel>
               <FormControl>
                 <>
-                  <div className='border rounded px-2 py-4 space-y-2'>
+                  <div className="space-y-2 rounded border px-2 py-4">
                     {showMorningPicker && <Label className="block w-full">Early Morning Slot Slot</Label>}
 
                     <div className="flex w-full items-center justify-between gap-4">
@@ -465,7 +472,7 @@ export function EquipmentForm() {
                       </div>
                     )}
                   </div>
-                  <div className='border rounded px-2 py-4 space-y-2'>
+                  <div className="space-y-2 rounded border px-2 py-4">
                     {showDayPicker && <Label>Day Slot</Label>}
 
                     <div className="flex w-full items-center justify-between gap-4">
@@ -531,7 +538,7 @@ export function EquipmentForm() {
                     )}
                   </div>
 
-                  <div className='border rounded px-2 py-4 space-y-2'>
+                  <div className="space-y-2 rounded border px-2 py-4">
                     {showEveningPicker && <Label>Evening Slot</Label>}
 
                     <div className="flex w-full items-center justify-between gap-4">
@@ -594,7 +601,7 @@ export function EquipmentForm() {
                     )}
                   </div>
 
-                  <div className='border rounded px-2 py-4 space-y-2'>
+                  <div className="space-y-2 rounded border px-2 py-4">
                     {showNightPicker && <Label>Night Slot</Label>}
                     <div className="flex w-full items-center justify-between gap-4">
                       {showNightPicker && (

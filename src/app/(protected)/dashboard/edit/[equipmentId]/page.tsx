@@ -384,6 +384,13 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   <SelectItem value={'1'}>1 hr</SelectItem>
                   <SelectItem value={'2'}>2 hr</SelectItem>
                   <SelectItem value={'3'}>3 hr</SelectItem>
+                  <SelectItem value={'4'}>4 hr</SelectItem>
+                  <SelectItem value={'5'}>5 hr</SelectItem>
+                  <SelectItem value={'6'}>6 hr</SelectItem>
+                  <SelectItem value={'7'}>7 hr</SelectItem>
+                  <SelectItem value={'8'}>8 hr</SelectItem>
+                  <SelectItem value={'9'}>9 hr</SelectItem>
+                  <SelectItem value={'10'}>10 hr</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

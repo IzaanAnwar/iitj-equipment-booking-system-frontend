@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Calendar, SlotInfo, momentLocalizer } from 'react-big-calendar';
+import { Calendar, Formats, SlotInfo, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
@@ -97,6 +97,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       min: endMinute,
     });
   }, [equipment.data?.slots]);
+  console.log({ startTiming, endTiming });
 
   const useCreateBooking = useMutation({
     mutationKey: ['create-booking'],
@@ -138,12 +139,19 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       throw new Error(await res.data);
       // throw new Error('seome');
     },
-   onSuccess:() => router.refresh() 
+    onSuccess: () => router.refresh(),
   });
+  const formats: Formats = useMemo(
+    () => ({
+      timeGutterFormat: 'HH:mm',
+    }),
+    [],
+  );
 
   const hanldeSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
       const startTime = moment(slotInfo.start);
+
       const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
 
       const bookingExists = useGetEvents.data?.find((item) => {
@@ -161,8 +169,17 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       });
 
       const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
-      const isTodayOrPast = moment(startTime).isSameOrBefore(moment(), 'day');
       const now = moment();
+      const isTodayOrPast = moment(startTime).isSameOrBefore(moment(), 'day');
+      if (isTodayOrPast) {
+        if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
+          toast({
+            title: 'Equipment not available for booking',
+            description: 'You are selecting a past date or time',
+          });
+          return;
+        }
+      }
       if (bookingExists?.id || !isTodayOrFuture) return;
       if (user?.role === 'user' && isWeekend) {
         toast({
@@ -181,21 +198,14 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         });
         return;
       }
+
       const fomrattedSelectedSlotData = parseSelectedSlot({
         slotInfo,
         equipmentSlot: userSelectedSlot,
         startMin: parsteStrTimeToInt(userSelectedSlot?.startTime)[1],
         slotDuration: equipment.data?.slotDuration!,
       });
-      if (isTodayOrPast) {
-        if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
-          toast({
-            title: 'Equipment not available for booking',
-            description: 'You are selecting a past date or time',
-          });
-          return;
-        }
-      }
+
       setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: userSelectedSlot.slotCost });
       setdailogOpen(true);
     },
@@ -311,6 +321,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           defaultView="week"
           onSelectSlot={hanldeSelectSlot}
           eventPropGetter={eventStyleGetter}
+          formats={formats}
           defaultDate={defaultDate}
           min={
             new Date(
@@ -485,7 +496,11 @@ function correctTiming(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: nu
 function findRighSlot(slotInfo: SlotInfo, equipmentSlots: Slot[], slotDuration: number) {
   const selSolt = equipmentSlots.find((slot) => {
     const interval = correctTiming(slotInfo, slot, slotDuration);
+    const endOfBooking = parseInt(slot.endTime.split(':')[0]);
 
+    if (interval?.end && interval.end > endOfBooking) {
+      return false;
+    }
     if (interval) return true;
   });
 
