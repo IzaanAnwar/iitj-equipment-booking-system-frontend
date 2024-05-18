@@ -83,9 +83,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
 
   function onSubmit() {
     if (openSlotModal === 'mod') {
-      console.log({ equipmentSlots });
-
-      // updateEquipmetnDetails.mutate();
+      updateEquipmetnDetails.mutate();
     }
     if (openSlotModal === 'cost') {
       if (!slotTypeSel || !updateSlotPrice) {
@@ -97,7 +95,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
       }
       console.log({ equipmentSlots });
 
-      // updateCost.mutate({ slotId: slotTypeSel, cost: updateSlotPrice });
+      updateCost.mutate({ slotId: slotTypeSel, cost: updateSlotPrice });
     }
   }
 
