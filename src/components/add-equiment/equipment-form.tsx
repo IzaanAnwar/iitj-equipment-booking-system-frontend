@@ -44,7 +44,6 @@ const equipmentFormSchema = z.object({
     required_error: 'Please write a description to display.',
   }),
   place: z.string(),
-  slot: z.string(),
   equipmentTime: z.array(slotSchema).optional(),
 });
 
@@ -372,44 +371,6 @@ export function EquipmentForm() {
           )}
         /> */}
 
-        <FormField
-          control={form.control}
-          name="slot"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hour/Slot</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Equipment slot" />
-                  </SelectTrigger>
-                  <SelectContent
-                    {...field}
-                    onChange={(val) => {
-                      console.log({ tome: val });
-                    }}
-                  >
-                    <SelectGroup>
-                      <SelectLabel>Select Equipment slot</SelectLabel>
-                      <SelectItem value={'1'}>1 hr</SelectItem>
-                      <SelectItem value={'2'}>2 hr</SelectItem>
-                      <SelectItem value={'3'}>3 hr</SelectItem>
-                      <SelectItem value={'4'}>4 hr</SelectItem>
-                      <SelectItem value={'5'}>5 hr</SelectItem>
-                      <SelectItem value={'6'}>6 hr</SelectItem>
-                      <SelectItem value={'7'}>7 hr</SelectItem>
-                      <SelectItem value={'8'}>8 hr</SelectItem>
-                      <SelectItem value={'9'}>9 hr</SelectItem>
-                      <SelectItem value={'10'}>10 hr</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="equipmentTime"
