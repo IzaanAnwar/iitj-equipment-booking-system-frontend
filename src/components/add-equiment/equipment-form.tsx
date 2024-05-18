@@ -151,19 +151,11 @@ export function EquipmentForm() {
           });
         }
       }
-      console.log({
-        name: data.name,
-        description: data.description,
-        place: data.place,
-        slot: Number(data.slot),
-        equipmentSlots: equimentSlotCategories,
-      });
 
       const res = await api.post('/equipments/add', {
         name: data.name,
         description: data.description,
         place: data.place,
-        slot: Number(data.slot),
         equipmentSlots: equimentSlotCategories,
       });
       console.log({ res });
@@ -299,7 +291,7 @@ export function EquipmentForm() {
       description: useAddEquipment.data?.message || 'Equipment Added!',
     });
     setToasted(true);
-    form.reset({ description: '', equipmentTime: [], name: '', place: '', slot: '' });
+    form.reset({ description: '', equipmentTime: [], name: '', place: '' });
   }
 
   if (!toasted && useAddEquipment.isError) {
