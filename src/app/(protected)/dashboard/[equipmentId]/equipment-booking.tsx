@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Calendar, Formats, SlotInfo, momentLocalizer } from 'react-big-calendar';
+import { Calendar, DateRange, Formats, SlotInfo, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
@@ -65,6 +65,11 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     evening?: { start: { hour: number; min: number }; end: { hour: number; min: number } };
     night?: { start: { hour: number; min: number }; end: { hour: number; min: number } };
   }>();
+
+  const [dayEvents, setDayEvents] = useState<IEvent[]>();
+  const [morningEvents, setMorningEvents] = useState<IEvent[]>();
+  const [eveningEvents, setEveningEvents] = useState<IEvent[]>();
+  const [nightEvents, setNightEvents] = useState<IEvent[]>();
 
   const localizer = momentLocalizer(moment);
 
@@ -150,6 +155,44 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         }),
     });
 
+    const morEvent = useGetEvents.data?.filter((event) => {
+      const slotStart = new Date(event.slotTimeStart).getHours();
+      const slotEnd = new Date(event.slotTimeEnd).getHours();
+
+      if (morningSlotStart && endmorningSlot && slotStart <= morningSlotStart?.[0] && slotEnd <= endmorningSlot?.[0]) {
+        return event;
+      }
+    });
+    const dEvent = useGetEvents.data?.filter((event) => {
+      const slotStart = new Date(event.slotTimeStart).getHours();
+      const slotEnd = new Date(event.slotTimeEnd).getHours();
+
+      if (daySlotStart && enddaySlot && slotStart <= daySlotStart?.[0] && slotEnd <= enddaySlot?.[0]) {
+        return event;
+      }
+    });
+    const eveEvent = useGetEvents.data?.filter((event) => {
+      const slotStart = new Date(event.slotTimeStart).getHours();
+      const slotEnd = new Date(event.slotTimeEnd).getHours();
+
+      if (eveSlotStart && endeveSlot && slotStart <= eveSlotStart?.[0] && slotEnd <= endeveSlot?.[0]) {
+        return event;
+      }
+    });
+    const nightEvent = useGetEvents.data?.filter((event) => {
+      const slotStart = new Date(event.slotTimeStart).getHours();
+      const slotEnd = new Date(event.slotTimeEnd).getHours();
+
+      if (nightSlotStart && endnightSlot && slotStart <= nightSlotStart?.[0] && slotEnd <= endnightSlot?.[0]) {
+        return event;
+      }
+    });
+
+    setMorningEvents(morEvent);
+    setDayEvents(dEvent);
+    setEveningEvents(eveEvent);
+    setNightEvents(nightEvent);
+
     const [startHour, startMinute] = parsteStrTimeToInt(start?.startTime);
     const [endHour, endMinute] = parsteStrTimeToInt(end?.endTime);
     setStartTiming({
@@ -160,8 +203,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       hour: endHour,
       min: endMinute,
     });
-  }, [equipment.data?.slots]);
-  console.log({ periods });
+  }, [equipment.data?.slots, useGetEvents.data]);
 
   const useCreateBooking = useMutation({
     mutationKey: ['create-booking'],
@@ -208,6 +250,9 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
   const formats: Formats = useMemo(
     () => ({
       timeGutterFormat: 'HH:mm',
+      eventTimeRangeFormat: ({ start, end }) => {
+        return `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`;
+      },
     }),
     [],
   );
@@ -549,7 +594,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           </Label>
         </div>
       )}
-      <main className="min-h-screen w-full space-y-2 px-2 py-8 md:px-16 lg:px-32">
+      <main className="min-h-screen w-full space-y-6 px-2 py-8 md:px-16 lg:px-32">
         <div className="space-y-1">
           <h5>Select Slot Type</h5>
           <div className="flex items-center justify-start gap-4">
@@ -595,7 +640,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           {morningSlot && selectedToggle === 'morning' && (
             <Calendar
               localizer={localizer}
-              events={useGetEvents.data}
+              events={morningEvents}
               date={currentDate}
               onNavigate={(date) => setCurrentDate(date)}
               startAccessor="start"
@@ -633,7 +678,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           {daySlot && selectedToggle === 'day' && (
             <Calendar
               localizer={localizer}
-              events={useGetEvents.data}
+              events={dayEvents}
               date={currentDate}
               onNavigate={(date) => setCurrentDate(date)}
               startAccessor="start"
@@ -670,7 +715,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           {eveningSlot && selectedToggle === 'eve' && (
             <Calendar
               localizer={localizer}
-              events={useGetEvents.data}
+              events={eveningEvents}
               date={currentDate}
               onNavigate={(date) => setCurrentDate(date)}
               startAccessor="start"
@@ -707,7 +752,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           {nighslot && selectedToggle === 'night' && (
             <Calendar
               localizer={localizer}
-              events={useGetEvents.data}
+              events={nightEvents}
               date={currentDate}
               onNavigate={(date) => setCurrentDate(date)}
               startAccessor="start"
