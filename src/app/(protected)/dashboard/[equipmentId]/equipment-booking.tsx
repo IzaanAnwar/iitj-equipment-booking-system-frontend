@@ -49,11 +49,25 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
   const [toasted, setToasted] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot>();
+  const [selectedToggle, setToggle] = useState<'morning' | 'day' | 'eve' | 'night'>('day');
   const [dailogOpen, setdailogOpen] = useState(false);
+  const [morningSlot, setMorningSlot] = useState<Slot>();
+  const [daySlot, setDaySlot] = useState<Slot>();
+  const [eveningSlot, setEveningSlot] = useState<Slot>();
+  const [nighslot, setNightSlot] = useState<Slot>();
   const [selectEvent, setSelectedEvent] = useState<IEvent>();
   const equipment = useGetEquipment({ equipmentId });
   const [startTiming, setStartTiming] = useState<{ hour: number; min: number }>();
   const [endTiming, setendTiming] = useState<{ hour: number; min: number }>();
+  const [periods, setPeriods] = useState<{
+    morning?: { start: { hour: number; min: number }; end: { hour: number; min: number } };
+    day?: { start: { hour: number; min: number }; end: { hour: number; min: number } };
+    evening?: { start: { hour: number; min: number }; end: { hour: number; min: number } };
+    night?: { start: { hour: number; min: number }; end: { hour: number; min: number } };
+  }>();
+
+  const localizer = momentLocalizer(moment);
+
   const useGetAccountDetails = useQuery({
     queryKey: ['account-details'],
     queryFn: async () => {
@@ -85,6 +99,56 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     if (!equipment.data?.slots) return;
 
     const { start, end } = findStartAndEnd(equipment.data?.slots);
+    const slot0 = equipment.data.slots.find((sl) => sl.slotType === 'MORNING');
+    const slot1 = equipment.data.slots.find((sl) => sl.slotType === 'DAY');
+    const slot2 = equipment.data.slots.find((sl) => sl.slotType === 'EVENING');
+    const slot3 = equipment.data.slots.find((sl) => sl.slotType === 'NIGHT');
+    console.log({ slot0 });
+
+    setMorningSlot(slot0);
+    setDaySlot(slot1);
+    setEveningSlot(slot2);
+    setNightSlot(slot3);
+    const morningSlotStart = slot0 && parsteStrTimeToInt(slot0?.startTime);
+    const endmorningSlot = slot0 && parsteStrTimeToInt(slot0?.endTime);
+    console.log({ morningSlotStart, endmorningSlot });
+
+    const daySlotStart = slot1 && parsteStrTimeToInt(slot1?.startTime);
+    const enddaySlot = slot1 && parsteStrTimeToInt(slot1?.endTime);
+    const eveSlotStart = slot2 && parsteStrTimeToInt(slot2?.startTime);
+    const endeveSlot = slot2 && parsteStrTimeToInt(slot2?.endTime);
+    const nightSlotStart = slot3 && parsteStrTimeToInt(slot3?.startTime);
+    const endnightSlot = slot3 && parsteStrTimeToInt(slot3?.endTime);
+    setPeriods({
+      ...(morningSlotStart &&
+        endmorningSlot && {
+          morning: {
+            start: { hour: morningSlotStart?.[0], min: morningSlotStart?.[1] },
+            end: { hour: endmorningSlot?.[0], min: endmorningSlot?.[1] },
+          },
+        }),
+      ...(daySlotStart &&
+        enddaySlot && {
+          day: {
+            start: { hour: daySlotStart?.[0], min: daySlotStart?.[1] },
+            end: { hour: enddaySlot?.[0], min: enddaySlot?.[1] },
+          },
+        }),
+      ...(eveSlotStart &&
+        endeveSlot && {
+          evening: {
+            start: { hour: eveSlotStart?.[0], min: eveSlotStart?.[1] },
+            end: { hour: endeveSlot?.[0], min: endeveSlot?.[1] },
+          },
+        }),
+      ...(nightSlotStart &&
+        endnightSlot && {
+          night: {
+            start: { hour: nightSlotStart?.[0], min: nightSlotStart?.[1] },
+            end: { hour: endnightSlot?.[0], min: endnightSlot?.[1] },
+          },
+        }),
+    });
 
     const [startHour, startMinute] = parsteStrTimeToInt(start?.startTime);
     const [endHour, endMinute] = parsteStrTimeToInt(end?.endTime);
@@ -97,7 +161,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       min: endMinute,
     });
   }, [equipment.data?.slots]);
-  console.log({ startTiming, endTiming });
+  console.log({ periods });
 
   const useCreateBooking = useMutation({
     mutationKey: ['create-booking'],
@@ -148,7 +212,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     [],
   );
 
-  const hanldeSelectSlot = useCallback(
+  const hanldeSelectMorningSlot = useCallback(
     (slotInfo: SlotInfo) => {
       const startTime = moment(slotInfo.start);
 
@@ -189,27 +253,207 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
         return;
       }
 
-      const { start } = findStartAndEnd(equipment.data?.slots!);
-      const userSelectedSlot = findRighSlot(slotInfo, equipment.data?.slots!, equipment.data?.slotDuration!);
-      if (!userSelectedSlot) {
+      const fomrattedSelectedSlotData = parseSelectedSlot({
+        slotInfo,
+        equipmentSlot: morningSlot!,
+        startMin: parsteStrTimeToInt(morningSlot?.startTime)[1],
+        slotDuration: morningSlot?.slotDuration!,
+      });
+      if (!fomrattedSelectedSlotData) {
+        toast({
+          title: 'Wrong Timing',
+          description: 'Equipment can not be booked for selected Time Slot',
+        });
+        return;
+      }
+      setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: morningSlot?.slotCost });
+      setdailogOpen(true);
+    },
+    [equipment.data, useGetEvents.data, user?.role, morningSlot],
+  );
+  ///
+
+  const hanldeSelectDaySlot = useCallback(
+    (slotInfo: SlotInfo) => {
+      const startTime = moment(slotInfo.start);
+
+      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
+
+      const bookingExists = useGetEvents.data?.find((item) => {
+        const startSlot = item.start;
+        const startSlotSel = slotInfo.start;
+        const endSlot = item.end;
+        const endSlotSel = slotInfo.end;
+
+        if (startSlotSel >= startSlot && startSlotSel < endSlot) {
+          return item;
+        }
+        if (endSlotSel <= endSlot && endSlotSel > startSlot) {
+          return item;
+        }
+      });
+
+      const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
+      const now = moment();
+      const isTodayOrPast = moment(startTime).isSameOrBefore(moment(), 'day');
+      if (isTodayOrPast) {
+        if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
+          toast({
+            title: 'Equipment not available for booking',
+            description: 'You are selecting a past date or time',
+          });
+          return;
+        }
+      }
+      if (bookingExists?.id || !isTodayOrFuture) return;
+      if (user?.role === 'user' && isWeekend) {
         toast({
           title: 'Equipment not available for booking',
-          description: 'Booking not allowd for selected Slot Time',
+          description: 'Equipment can not be booked during weekends',
         });
         return;
       }
 
       const fomrattedSelectedSlotData = parseSelectedSlot({
         slotInfo,
-        equipmentSlot: userSelectedSlot,
-        startMin: parsteStrTimeToInt(userSelectedSlot?.startTime)[1],
-        slotDuration: equipment.data?.slotDuration!,
+        equipmentSlot: daySlot!,
+        startMin: parsteStrTimeToInt(daySlot?.startTime)[1],
+        slotDuration: daySlot?.slotDuration!,
       });
-
-      setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: userSelectedSlot.slotCost });
+      if (!fomrattedSelectedSlotData) {
+        toast({
+          title: 'Wrong Timing',
+          description: 'Equipment can not be booked for selected Time Slot',
+        });
+        return;
+      }
+      setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: daySlot?.slotCost });
       setdailogOpen(true);
     },
-    [equipment.data, useGetEvents.data, user?.role],
+    [equipment.data, useGetEvents.data, user?.role, daySlot],
+  );
+  //
+
+  const hanldeSelectEveningSlot = useCallback(
+    (slotInfo: SlotInfo) => {
+      const startTime = moment(slotInfo.start);
+
+      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
+
+      const bookingExists = useGetEvents.data?.find((item) => {
+        const startSlot = item.start;
+        const startSlotSel = slotInfo.start;
+        const endSlot = item.end;
+        const endSlotSel = slotInfo.end;
+
+        if (startSlotSel >= startSlot && startSlotSel < endSlot) {
+          return item;
+        }
+        if (endSlotSel <= endSlot && endSlotSel > startSlot) {
+          return item;
+        }
+      });
+
+      const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
+      const now = moment();
+      const isTodayOrPast = moment(startTime).isSameOrBefore(moment(), 'day');
+      if (isTodayOrPast) {
+        if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
+          toast({
+            title: 'Equipment not available for booking',
+            description: 'You are selecting a past date or time',
+          });
+          return;
+        }
+      }
+      if (bookingExists?.id || !isTodayOrFuture) return;
+      if (user?.role === 'user' && isWeekend) {
+        toast({
+          title: 'Equipment not available for booking',
+          description: 'Equipment can not be booked during weekends',
+        });
+        return;
+      }
+
+      const fomrattedSelectedSlotData = parseSelectedSlot({
+        slotInfo,
+        equipmentSlot: eveningSlot!,
+        startMin: parsteStrTimeToInt(eveningSlot?.startTime)[1],
+        slotDuration: eveningSlot?.slotDuration!,
+      });
+      if (!fomrattedSelectedSlotData) {
+        toast({
+          title: 'Wrong Timing',
+          description: 'Equipment can not be booked for selected Time Slot',
+        });
+        return;
+      }
+
+      setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: eveningSlot?.slotCost });
+      setdailogOpen(true);
+    },
+    [equipment.data, useGetEvents.data, user?.role, eveningSlot],
+  );
+  //
+
+  const hanldeSelectNightSlot = useCallback(
+    (slotInfo: SlotInfo) => {
+      const startTime = moment(slotInfo.start);
+
+      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
+
+      const bookingExists = useGetEvents.data?.find((item) => {
+        const startSlot = item.start;
+        const startSlotSel = slotInfo.start;
+        const endSlot = item.end;
+        const endSlotSel = slotInfo.end;
+
+        if (startSlotSel >= startSlot && startSlotSel < endSlot) {
+          return item;
+        }
+        if (endSlotSel <= endSlot && endSlotSel > startSlot) {
+          return item;
+        }
+      });
+
+      const isTodayOrFuture = moment(startTime).isSameOrAfter(moment(), 'day');
+      const now = moment();
+      const isTodayOrPast = moment(startTime).isSameOrBefore(moment(), 'day');
+      if (isTodayOrPast) {
+        if (startTime.hour() < now.hour() && startTime.day() <= now.day()) {
+          toast({
+            title: 'Equipment not available for booking',
+            description: 'You are selecting a past date or time',
+          });
+          return;
+        }
+      }
+      if (bookingExists?.id || !isTodayOrFuture) return;
+      if (user?.role === 'user' && isWeekend) {
+        toast({
+          title: 'Equipment not available for booking',
+          description: 'Equipment can not be booked during weekends',
+        });
+        return;
+      }
+
+      const fomrattedSelectedSlotData = parseSelectedSlot({
+        slotInfo,
+        equipmentSlot: nighslot!,
+        startMin: parsteStrTimeToInt(nighslot?.startTime)[1],
+        slotDuration: nighslot?.slotDuration!,
+      });
+      if (!fomrattedSelectedSlotData) {
+        toast({
+          title: 'Wrong Timing',
+          description: 'Equipment can not be booked for selected Time Slot',
+        });
+        return;
+      }
+      setSelectedSlot({ ...fomrattedSelectedSlotData!, cost: nighslot?.slotCost });
+      setdailogOpen(true);
+    },
+    [equipment.data, useGetEvents.data, user?.role, nighslot],
   );
 
   const { defaultDate } = useMemo(() => {
@@ -233,7 +477,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
 
     return { style };
   };
-  const localizer = momentLocalizer(moment);
   if (useGetEvents.isPending || equipment.isPending || !startTiming) {
     return (
       <div className="flex h-screen w-full  items-center justify-center  ">
@@ -241,6 +484,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       </div>
     );
   }
+  console.log({ morningSlot, daySlot, eveningSlot, nighslot });
 
   const customDayPropGetter = (date: Date) => {
     const today = moment();
@@ -251,7 +495,6 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     };
   };
 
-  const timeApart = equipment.data?.slotDuration;
   if (!user) {
     router.push('/');
     return;
@@ -306,42 +549,199 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
           </Label>
         </div>
       )}
-      <main className="h-screen w-full px-2 py-8 md:px-16 lg:px-32">
-        <Calendar
-          localizer={localizer}
-          events={useGetEvents.data}
-          date={currentDate}
-          onNavigate={(date) => setCurrentDate(date)}
-          startAccessor="start"
-          endAccessor="end"
-          step={60}
-          dayPropGetter={customDayPropGetter}
-          selectable
-          timeslots={timeApart}
-          defaultView="week"
-          onSelectSlot={hanldeSelectSlot}
-          eventPropGetter={eventStyleGetter}
-          formats={formats}
-          defaultDate={defaultDate}
-          min={
-            new Date(
-              currentDate.getFullYear(),
-              currentDate.getMonth(),
-              currentDate.getDate(),
-              startTiming?.hour,
-              startTiming?.min,
-            )
-          }
-          max={
-            new Date(
-              currentDate.getFullYear(),
-              currentDate.getMonth(),
-              currentDate.getDate(),
-              endTiming?.hour,
-              endTiming?.min,
-            )
-          }
-        />
+      <main className="min-h-screen w-full space-y-2 px-2 py-8 md:px-16 lg:px-32">
+        <div className="space-y-1">
+          <h5>Select Slot Type</h5>
+          <div className="flex items-center justify-start gap-4">
+            {morningSlot && (
+              <Button
+                variant={selectedToggle === 'morning' ? 'default' : 'secondary'}
+                size={'sm'}
+                onClick={() => setToggle('morning')}
+              >
+                Earky Morning
+              </Button>
+            )}
+            {daySlot && (
+              <Button
+                variant={selectedToggle === 'day' ? 'default' : 'secondary'}
+                size={'sm'}
+                onClick={() => setToggle('day')}
+              >
+                Day
+              </Button>
+            )}
+            {eveningSlot && (
+              <Button
+                variant={selectedToggle === 'eve' ? 'default' : 'secondary'}
+                size={'sm'}
+                onClick={() => setToggle('eve')}
+              >
+                Evening
+              </Button>
+            )}
+            {nighslot && (
+              <Button
+                variant={selectedToggle === 'night' ? 'default' : 'secondary'}
+                size={'sm'}
+                onClick={() => setToggle('night')}
+              >
+                Night
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className="w-full">
+          {morningSlot && selectedToggle === 'morning' && (
+            <Calendar
+              localizer={localizer}
+              events={useGetEvents.data}
+              date={currentDate}
+              onNavigate={(date) => setCurrentDate(date)}
+              startAccessor="start"
+              endAccessor="end"
+              step={60}
+              dayPropGetter={customDayPropGetter}
+              selectable
+              timeslots={morningSlot.slotDuration}
+              defaultView="week"
+              onSelectSlot={hanldeSelectMorningSlot}
+              eventPropGetter={eventStyleGetter}
+              formats={formats}
+              defaultDate={defaultDate}
+              min={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+                  periods?.morning?.start.hour,
+                  periods?.morning?.start.min,
+                )
+              }
+              max={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+
+                  periods?.morning?.end?.hour,
+                  periods?.morning?.end?.min,
+                )
+              }
+            />
+          )}
+          {daySlot && selectedToggle === 'day' && (
+            <Calendar
+              localizer={localizer}
+              events={useGetEvents.data}
+              date={currentDate}
+              onNavigate={(date) => setCurrentDate(date)}
+              startAccessor="start"
+              endAccessor="end"
+              step={60}
+              dayPropGetter={customDayPropGetter}
+              selectable
+              timeslots={daySlot.slotDuration}
+              defaultView="week"
+              onSelectSlot={hanldeSelectDaySlot}
+              eventPropGetter={eventStyleGetter}
+              formats={formats}
+              defaultDate={defaultDate}
+              min={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+                  periods?.day?.start.hour,
+                  periods?.day?.start.min,
+                )
+              }
+              max={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+                  periods?.day?.end?.hour,
+                  periods?.day?.end?.min,
+                )
+              }
+            />
+          )}
+          {eveningSlot && selectedToggle === 'eve' && (
+            <Calendar
+              localizer={localizer}
+              events={useGetEvents.data}
+              date={currentDate}
+              onNavigate={(date) => setCurrentDate(date)}
+              startAccessor="start"
+              endAccessor="end"
+              step={60}
+              dayPropGetter={customDayPropGetter}
+              selectable
+              timeslots={eveningSlot?.slotDuration}
+              defaultView="week"
+              onSelectSlot={hanldeSelectEveningSlot}
+              eventPropGetter={eventStyleGetter}
+              formats={formats}
+              defaultDate={defaultDate}
+              min={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+                  periods?.evening?.start.hour,
+                  periods?.evening?.start.min,
+                )
+              }
+              max={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+                  periods?.evening?.end?.hour,
+                  periods?.evening?.end?.min,
+                )
+              }
+            />
+          )}
+          {nighslot && selectedToggle === 'night' && (
+            <Calendar
+              localizer={localizer}
+              events={useGetEvents.data}
+              date={currentDate}
+              onNavigate={(date) => setCurrentDate(date)}
+              startAccessor="start"
+              endAccessor="end"
+              step={60}
+              dayPropGetter={customDayPropGetter}
+              selectable
+              timeslots={nighslot.slotDuration}
+              defaultView="week"
+              onSelectSlot={hanldeSelectNightSlot}
+              eventPropGetter={eventStyleGetter}
+              formats={formats}
+              defaultDate={defaultDate}
+              min={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+                  periods?.night?.start.hour,
+                  periods?.night?.start.min,
+                )
+              }
+              max={
+                new Date(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth(),
+                  currentDate.getDate(),
+                  periods?.night?.end?.hour,
+                  periods?.night?.end?.min,
+                )
+              }
+            />
+          )}
+        </div>
         {selectedSlot && (
           <AlertDialog open={dailogOpen}>
             <AlertDialogContent>
@@ -434,6 +834,7 @@ function parseSelectedSlot({
   slotDuration: number;
 }): SelectedSlot | null {
   const interval = correctTiming(slotInfo, equipmentSlot, slotDuration);
+  console.log({ interval });
 
   if (!interval) return null;
 
@@ -465,17 +866,6 @@ function findStartAndEnd(slotInfo: Slot[]) {
   return { start: sortedArray.at(0), end: sortedArray.at(-1), sortedArray };
 }
 
-// function findCostOfBooking(slots: Slot[], selectedSlot: SelectedSlot) {
-//   const reqSlot = slots.find((slot) => {
-//     const startHour = parseInt(slot.startTime.split(':')[0]);
-//     const endHour = parseInt(slot.endTime.split(':')[0]);
-//     if (selectedSlot.start.startHour >= startHour && selectedSlot.end.endHour <= endHour) return slot;
-//   });
-//   console.log({ reqSlot });
-
-//   return reqSlot;
-// }
-
 function correctTiming(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: number) {
   const startOfBooking = parseInt(equipmentSlot.startTime.split(':')[0]);
   const endOfBooking = parseInt(equipmentSlot.endTime.split(':')[0]);
@@ -485,7 +875,9 @@ function correctTiming(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: nu
   let m = startOfBooking;
   let n = startOfBooking + slotDuration;
   while (m < endOfBooking) {
-    intervals.push({ start: m, end: n });
+    if (n <= endOfBooking) {
+      intervals.push({ start: m, end: n });
+    }
     n = n + slotDuration;
     m = m + slotDuration;
   }
@@ -493,16 +885,16 @@ function correctTiming(slotInfo: SlotInfo, equipmentSlot: Slot, slotDuration: nu
   return intervals.find((item) => startHour >= item.start && endHour <= item.end);
 }
 
-function findRighSlot(slotInfo: SlotInfo, equipmentSlots: Slot[], slotDuration: number) {
-  const selSolt = equipmentSlots.find((slot) => {
-    const interval = correctTiming(slotInfo, slot, slotDuration);
-    const endOfBooking = parseInt(slot.endTime.split(':')[0]);
+// function findRighSlot(slotInfo: SlotInfo, equipmentSlots: Slot[], slotDuration: number) {
+//   const selSolt = equipmentSlots.find((slot) => {
+//     const interval = correctTiming(slotInfo, slot, slotDuration);
+//     const endOfBooking = parseInt(slot.endTime.split(':')[0]);
 
-    if (interval?.end && interval.end > endOfBooking) {
-      return false;
-    }
-    if (interval) return true;
-  });
+//     if (interval?.end && interval.end > endOfBooking) {
+//       return false;
+//     }
+//     if (interval) return true;
+//   });
 
-  return selSolt;
-}
+//   return selSolt;
+// }

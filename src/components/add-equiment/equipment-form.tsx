@@ -31,6 +31,7 @@ import { Dayjs } from 'dayjs';
 const slotSchema = z.object({
   type: z.enum(['DAY', 'EVENING', 'NIGHT']),
   cost: z.string(),
+  slotDuration: z.number().optional(),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
 });
@@ -67,12 +68,15 @@ export function EquipmentForm() {
       type: string;
       startTime: string | undefined | null;
       endTime: string | undefined | null;
+      duration: string;
     }[]
   >([]);
   const [daySlotCost, setDaySlotCost] = useState<number>();
   const [morningSlotCost, setMorningSlotCost] = useState<number>();
   const [eveningSlotCost, setEveningSlotCost] = useState<number>();
   const [nightSlotCost, setNightSlotCost] = useState<number>();
+  // const [daySlotDuration,setDaySlotDuration]
+
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentFormSchema),
     mode: 'onChange',
@@ -120,7 +124,13 @@ export function EquipmentForm() {
   const useAddEquipment = useMutation({
     mutationKey: ['add-equipment'],
     mutationFn: async (data: EquipmentFormValues) => {
-      const equimentSlotCategories: { type: string; cost: number; startTime: string; endTime: string }[] = [];
+      const equimentSlotCategories: {
+        type: string;
+        cost: number;
+        startTime: string;
+        endTime: string;
+        duration: number;
+      }[] = [];
       for (const category of equipmentSlots) {
         let cost: number | undefined = 0;
         if (category.type === 'MORNING') {
@@ -136,6 +146,7 @@ export function EquipmentForm() {
           equimentSlotCategories.push({
             type: category.type,
             cost: cost || 0,
+            duration: parseInt(category.duration),
             startTime: category.startTime!,
             endTime: category.endTime!,
           });
@@ -255,7 +266,7 @@ export function EquipmentForm() {
     }
     let isErr: boolean = false;
     equipmentSlots.forEach((sl) => {
-      if (!sl.endTime || !sl.startTime || !sl.type) {
+      if (!sl.endTime || !sl.startTime || !sl.type || !sl.duration) {
         isErr = true;
       }
     });
@@ -407,12 +418,46 @@ export function EquipmentForm() {
               <FormLabel>Lab Hours</FormLabel>
               <FormControl>
                 <>
-                  <div className="space-y-2 rounded border px-2 py-4">
+                  <div className="space-y-3 rounded border px-2 py-4">
                     {showMorningPicker && <Label className="block w-full">Early Morning Slot Slot</Label>}
 
-                    <div className="flex w-full items-center justify-between gap-4">
+                    <div className="space-y-2">
                       {showMorningPicker && (
-                        <>
+                        <Select
+                          onValueChange={(val) => {
+                            setEquipmentSlots((prevSlots) => {
+                              const updatedSlots = [...prevSlots];
+
+                              updatedSlots[0] = {
+                                ...updatedSlots[0],
+                                duration: val,
+                              };
+                              return updatedSlots;
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Equipment slot" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Select Equipment slot</SelectLabel>
+                              <SelectItem value={'1'}>1 hr</SelectItem>
+                              <SelectItem value={'2'}>2 hr</SelectItem>
+                              <SelectItem value={'3'}>3 hr</SelectItem>
+                              <SelectItem value={'4'}>4 hr</SelectItem>
+                              <SelectItem value={'5'}>5 hr</SelectItem>
+                              <SelectItem value={'6'}>6 hr</SelectItem>
+                              <SelectItem value={'7'}>7 hr</SelectItem>
+                              <SelectItem value={'8'}>8 hr</SelectItem>
+                              <SelectItem value={'9'}>9 hr</SelectItem>
+                              <SelectItem value={'10'}>10 hr</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <div className="flex w-full items-center justify-between gap-4">
+                        {showMorningPicker && (
                           <TimePicker.RangePicker
                             format={'HH-mm'}
                             disabledTime={disabledTimeMorning}
@@ -436,48 +481,83 @@ export function EquipmentForm() {
                             }}
                             className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           />
-                        </>
-                      )}
-                      {showMorningPicker ? (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => removeSlot('MORNING')}
-                          variant="destructive"
-                          className="animate-fade-right animate-duration-200"
-                        >
-                          Remove
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => handleAddSlot('MORNING')}
-                          className="w-full animate-fade-left animate-duration-200"
-                          variant="outline"
-                        >
-                          Add Early Morning Slot
-                        </Button>
+                        )}
+                        {showMorningPicker ? (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => removeSlot('MORNING')}
+                            variant="destructive"
+                            className="animate-fade-right animate-duration-200"
+                          >
+                            Remove
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => handleAddSlot('MORNING')}
+                            className="w-full animate-fade-left animate-duration-200"
+                            variant="outline"
+                          >
+                            Add Early Morning Slot
+                          </Button>
+                        )}
+                      </div>
+                      {showMorningPicker && (
+                        <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                          <Label>Usage Charge Per Slot</Label>
+                          <Input
+                            type="number"
+                            placeholder="eg: 1"
+                            value={morningSlotCost}
+                            onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
+                          />
+                        </div>
                       )}
                     </div>
-                    {showMorningPicker && (
-                      <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                        <Label>Usage Charge Per Slot</Label>
-                        <Input
-                          type="number"
-                          placeholder="eg: 1"
-                          value={morningSlotCost}
-                          onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
-                        />
-                      </div>
-                    )}
                   </div>
+
                   <div className="space-y-2 rounded border px-2 py-4">
                     {showDayPicker && <Label>Day Slot</Label>}
 
-                    <div className="flex w-full items-center justify-between gap-4">
+                    <div className="space-y-2">
                       {showDayPicker && (
-                        <>
+                        <Select
+                          onValueChange={(val) => {
+                            setEquipmentSlots((prevSlots) => {
+                              const updatedSlots = [...prevSlots];
+
+                              updatedSlots[1] = {
+                                ...updatedSlots[1],
+                                duration: val,
+                              };
+                              return updatedSlots;
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Equipment slot" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Select Equipment slot</SelectLabel>
+                              <SelectItem value={'1'}>1 hr</SelectItem>
+                              <SelectItem value={'2'}>2 hr</SelectItem>
+                              <SelectItem value={'3'}>3 hr</SelectItem>
+                              <SelectItem value={'4'}>4 hr</SelectItem>
+                              <SelectItem value={'5'}>5 hr</SelectItem>
+                              <SelectItem value={'6'}>6 hr</SelectItem>
+                              <SelectItem value={'7'}>7 hr</SelectItem>
+                              <SelectItem value={'8'}>8 hr</SelectItem>
+                              <SelectItem value={'9'}>9 hr</SelectItem>
+                              <SelectItem value={'10'}>10 hr</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <div className="flex w-full items-center justify-between gap-4">
+                        {showDayPicker && (
                           <TimePicker.RangePicker
                             format={'HH-mm'}
                             disabledTime={disabledTimeDay}
@@ -501,150 +581,222 @@ export function EquipmentForm() {
                             }}
                             className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           />
-                        </>
-                      )}
-                      {showDayPicker ? (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => removeSlot('DAY')}
-                          variant="destructive"
-                          className="animate-fade-right animate-duration-200"
-                        >
-                          Remove
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => handleAddSlot('DAY')}
-                          className="w-full animate-fade-left animate-duration-200"
-                          variant="outline"
-                        >
-                          Add Day Slot
-                        </Button>
+                        )}
+                        {showDayPicker ? (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => removeSlot('DAY')}
+                            variant="destructive"
+                            className="animate-fade-right animate-duration-200"
+                          >
+                            Remove
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => handleAddSlot('DAY')}
+                            className="w-full animate-fade-left animate-duration-200"
+                            variant="outline"
+                          >
+                            Add Day Slot
+                          </Button>
+                        )}
+                      </div>
+                      {showDayPicker && (
+                        <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                          <Label>Usage Charge Per Slot</Label>
+                          <Input
+                            type="number"
+                            placeholder="eg: 1"
+                            value={daySlotCost}
+                            onChange={(e) => setDaySlotCost(parseInt(e.target.value))}
+                          />
+                        </div>
                       )}
                     </div>
-                    {showDayPicker && (
-                      <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                        <Label>Usage Charge Per Slot</Label>
-                        <Input
-                          type="number"
-                          placeholder="eg: 1"
-                          value={daySlotCost}
-                          onChange={(e) => setDaySlotCost(parseInt(e.target.value))}
-                        />
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-2 rounded border px-2 py-4">
                     {showEveningPicker && <Label>Evening Slot</Label>}
 
-                    <div className="flex w-full items-center justify-between gap-4">
+                    <div className="space-y-2">
                       {showEveningPicker && (
-                        <TimePicker.RangePicker
-                          disabledTime={disabledTimeEvening}
-                          format={'HH:mm'}
-                          onChange={(val) => {
-                            console.log({ val, vale: val[1] });
-
+                        <Select
+                          onValueChange={(val) => {
                             setEquipmentSlots((prevSlots) => {
-                              const updatedSlots = [...prevSlots!];
+                              const updatedSlots = [...prevSlots];
+
                               updatedSlots[2] = {
                                 ...updatedSlots[2],
-                                type: 'EVENING',
-                                startTime: val[0]?.format('HH:mm'),
-                                endTime: val[1]?.format('HH:mm'),
+                                duration: val,
                               };
                               return updatedSlots;
                             });
-                            setDisableEveStart(val[0]?.hour() || 23);
-                            setDisableEveEnd(val[1]?.hour() || 23);
-                            setDisableNightStart(val[1]?.hour() || 23);
                           }}
-                          className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        />
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Equipment slot" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Select Equipment slot</SelectLabel>
+                              <SelectItem value={'1'}>1 hr</SelectItem>
+                              <SelectItem value={'2'}>2 hr</SelectItem>
+                              <SelectItem value={'3'}>3 hr</SelectItem>
+                              <SelectItem value={'4'}>4 hr</SelectItem>
+                              <SelectItem value={'5'}>5 hr</SelectItem>
+                              <SelectItem value={'6'}>6 hr</SelectItem>
+                              <SelectItem value={'7'}>7 hr</SelectItem>
+                              <SelectItem value={'8'}>8 hr</SelectItem>
+                              <SelectItem value={'9'}>9 hr</SelectItem>
+                              <SelectItem value={'10'}>10 hr</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
                       )}
-                      {showEveningPicker ? (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => removeSlot('EVE')}
-                          variant="destructive"
-                          className="animate-fade-right animate-duration-200"
-                        >
-                          Remove
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => handleAddSlot('EVE')}
-                          className="w-full animate-fade-left animate-duration-200"
-                          variant="outline"
-                        >
-                          Add Evening Slot
-                        </Button>
+                      <div className=" flex w-full items-center justify-between gap-4">
+                        {showEveningPicker && (
+                          <TimePicker.RangePicker
+                            disabledTime={disabledTimeEvening}
+                            format={'HH:mm'}
+                            onChange={(val) => {
+                              console.log({ val, vale: val[1] });
+
+                              setEquipmentSlots((prevSlots) => {
+                                const updatedSlots = [...prevSlots!];
+                                updatedSlots[2] = {
+                                  ...updatedSlots[2],
+                                  type: 'EVENING',
+                                  startTime: val[0]?.format('HH:mm'),
+                                  endTime: val[1]?.format('HH:mm'),
+                                };
+                                return updatedSlots;
+                              });
+                              setDisableEveStart(val[0]?.hour() || 23);
+                              setDisableEveEnd(val[1]?.hour() || 23);
+                              setDisableNightStart(val[1]?.hour() || 23);
+                            }}
+                            className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        )}
+                        {showEveningPicker ? (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => removeSlot('EVE')}
+                            variant="destructive"
+                            className="animate-fade-right animate-duration-200"
+                          >
+                            Remove
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => handleAddSlot('EVE')}
+                            className="w-full animate-fade-left animate-duration-200"
+                            variant="outline"
+                          >
+                            Add Evening Slot
+                          </Button>
+                        )}
+                      </div>
+                      {showEveningPicker && (
+                        <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                          <Label>Usage Charge Per Slot</Label>
+                          <Input
+                            type="number"
+                            placeholder="eg: 1"
+                            value={eveningSlotCost}
+                            onChange={(e) => setEveningSlotCost(parseInt(e.target.value))}
+                          />
+                        </div>
                       )}
                     </div>
-                    {showEveningPicker && (
-                      <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
-                        <Label>Usage Charge Per Slot</Label>
-                        <Input
-                          type="number"
-                          placeholder="eg: 1"
-                          value={eveningSlotCost}
-                          onChange={(e) => setEveningSlotCost(parseInt(e.target.value))}
-                        />
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-2 rounded border px-2 py-4">
                     {showNightPicker && <Label>Night Slot</Label>}
-                    <div className="flex w-full items-center justify-between gap-4">
+                    <div className="space-y-2">
                       {showNightPicker && (
-                        <TimePicker.RangePicker
-                          disabledTime={disabledTimeNight}
-                          format={'HH-mm'}
-                          onChange={(val) => {
+                        <Select
+                          onValueChange={(val) => {
                             setEquipmentSlots((prevSlots) => {
-                              const updatedSlots = [...prevSlots!];
+                              const updatedSlots = [...prevSlots];
+
                               updatedSlots[3] = {
                                 ...updatedSlots[3],
-                                type: 'NIGHT',
-                                startTime: val[0]?.format('HH:mm'),
-                                endTime: val[1]?.format('HH:mm'),
+                                duration: val,
                               };
                               return updatedSlots;
                             });
-                            setDisableEveEnd(val[0]?.hour() || 24);
                           }}
-                          className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                      )}
-                      {showNightPicker ? (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => removeSlot('NIGHT')}
-                          variant="destructive"
-                          className="animate-fade-right animate-duration-200"
                         >
-                          Remove
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => handleAddSlot('NIGHT')}
-                          className="w-full animate-fade-left animate-duration-200"
-                          variant="outline"
-                        >
-                          Add Night Slot
-                        </Button>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Equipment slot" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Select Equipment slot</SelectLabel>
+                              <SelectItem value={'1'}>1 hr</SelectItem>
+                              <SelectItem value={'2'}>2 hr</SelectItem>
+                              <SelectItem value={'3'}>3 hr</SelectItem>
+                              <SelectItem value={'4'}>4 hr</SelectItem>
+                              <SelectItem value={'5'}>5 hr</SelectItem>
+                              <SelectItem value={'6'}>6 hr</SelectItem>
+                              <SelectItem value={'7'}>7 hr</SelectItem>
+                              <SelectItem value={'8'}>8 hr</SelectItem>
+                              <SelectItem value={'9'}>9 hr</SelectItem>
+                              <SelectItem value={'10'}>10 hr</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
                       )}
+                      <div className="flex w-full items-center justify-between gap-4">
+                        {showNightPicker && (
+                          <TimePicker.RangePicker
+                            disabledTime={disabledTimeNight}
+                            format={'HH-mm'}
+                            onChange={(val) => {
+                              setEquipmentSlots((prevSlots) => {
+                                const updatedSlots = [...prevSlots!];
+                                updatedSlots[3] = {
+                                  ...updatedSlots[3],
+                                  type: 'NIGHT',
+                                  startTime: val[0]?.format('HH:mm'),
+                                  endTime: val[1]?.format('HH:mm'),
+                                };
+                                return updatedSlots;
+                              });
+                              setDisableEveEnd(val[0]?.hour() || 24);
+                            }}
+                            className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        )}
+                        {showNightPicker ? (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => removeSlot('NIGHT')}
+                            variant="destructive"
+                            className="animate-fade-right animate-duration-200"
+                          >
+                            Remove
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            type="button"
+                            onClick={() => handleAddSlot('NIGHT')}
+                            className="w-full animate-fade-left animate-duration-200"
+                            variant="outline"
+                          >
+                            Add Night Slot
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {showNightPicker && (

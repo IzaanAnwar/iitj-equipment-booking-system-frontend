@@ -52,6 +52,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
       type: string;
       startTime: string | undefined | null;
       endTime: string | undefined | null;
+      duration: string;
     }[]
   >([]);
   const [morningSlotCost, setMorningSlotCost] = useState<number>();
@@ -82,7 +83,9 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
 
   function onSubmit() {
     if (openSlotModal === 'mod') {
-      updateEquipmetnDetails.mutate();
+      console.log({ equipmentSlots });
+
+      // updateEquipmetnDetails.mutate();
     }
     if (openSlotModal === 'cost') {
       if (!slotTypeSel || !updateSlotPrice) {
@@ -92,7 +95,9 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
         });
         return;
       }
-      updateCost.mutate({ slotId: slotTypeSel, cost: updateSlotPrice });
+      console.log({ equipmentSlots });
+
+      // updateCost.mutate({ slotId: slotTypeSel, cost: updateSlotPrice });
     }
   }
 
@@ -139,7 +144,13 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
       try {
         console.log('Starting update');
 
-        const equimentSlotCategories: { type: string; cost: number; startTime: string; endTime: string }[] = [];
+        const equimentSlotCategories: {
+          type: string;
+          cost: number;
+          startTime: string;
+          endTime: string;
+          duration: number;
+        }[] = [];
         for (const category of equipmentSlots) {
           let cost: number | undefined = 0;
           if (category?.type === 'MORNING') {
@@ -155,6 +166,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
             equimentSlotCategories.push({
               type: category.type,
               cost: cost || 0,
+              duration: parseInt(category.duration),
               startTime: category.startTime!,
               endTime: category.endTime!,
             });
@@ -165,7 +177,6 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
           name,
           place,
           description,
-          slotDuration: slotDuration && parseInt(slotDuration),
           equipmentSlots: equimentSlotCategories,
         });
         console.log({ res });
@@ -296,7 +307,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
       <AlertDialog open={open} onOpenChange={(state) => setOpen(state)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to update this changes?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to update these changes?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4 text-[0.925rem] text-zinc-950">
               <div>
                 <p>
@@ -319,24 +330,29 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                 {equipmentSlots.at(0) && (
                   <p>
                     <strong>{equipmentSlots.at(0)?.type}</strong> {equipmentSlots.at(0)?.startTime} -{' '}
-                    {equipmentSlots.at(0)?.endTime} at {daySlotCost} credit
+                    {equipmentSlots.at(0)?.endTime} at {daySlotCost} credit and <strong>Slot Duration</strong>{' '}
+                    {equipmentSlots.at(0)?.duration} h
                   </p>
                 )}
                 {equipmentSlots.at(1) && (
                   <p>
                     <strong>{equipmentSlots.at(1)?.type}</strong> {equipmentSlots.at(1)?.startTime} -{' '}
-                    {equipmentSlots.at(1)?.endTime} at {eveningSlotCost} credit
+                    {equipmentSlots.at(1)?.endTime} at {eveningSlotCost} credit and <strong>Slot Duration</strong>{' '}
+                    {equipmentSlots.at(1)?.duration} h
                   </p>
                 )}
                 {equipmentSlots.at(2) && (
                   <p>
                     <strong>{equipmentSlots.at(2)?.type}</strong> {equipmentSlots.at(2)?.startTime} -{' '}
-                    {equipmentSlots.at(2)?.endTime} at {nightSlotCost} credit
+                    {equipmentSlots.at(2)?.endTime} at {nightSlotCost} credit and <strong>Slot Duration</strong>{' '}
+                    {equipmentSlots.at(2)?.duration} h
                   </p>
                 )}
-                {slotDuration && (
+                {equipmentSlots.at(3) && (
                   <p>
-                    <strong>Slot Duration</strong> {slotDuration} h
+                    <strong>{equipmentSlots.at(3)?.type}</strong> {equipmentSlots.at(3)?.startTime} -{' '}
+                    {equipmentSlots.at(3)?.endTime} at {nightSlotCost} credit and <strong>Slot Duration</strong>{' '}
+                    {equipmentSlots.at(3)?.duration} h
                   </p>
                 )}
               </div>
@@ -369,38 +385,15 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
             <Label>Description</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
-          <div className="space-y-2">
-            <Label>Slot Duration</Label>
-            <Select
-              onValueChange={(value) => setSlotDuration(value)}
-              defaultValue={equipment.data?.slotDuration.toString()}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Equipment slot" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Select Equipment slot</SelectLabel>
-                  <SelectItem value={'1'}>1 hr</SelectItem>
-                  <SelectItem value={'2'}>2 hr</SelectItem>
-                  <SelectItem value={'3'}>3 hr</SelectItem>
-                  <SelectItem value={'4'}>4 hr</SelectItem>
-                  <SelectItem value={'5'}>5 hr</SelectItem>
-                  <SelectItem value={'6'}>6 hr</SelectItem>
-                  <SelectItem value={'7'}>7 hr</SelectItem>
-                  <SelectItem value={'8'}>8 hr</SelectItem>
-                  <SelectItem value={'9'}>9 hr</SelectItem>
-                  <SelectItem value={'10'}>10 hr</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+
           <div className="space-y-2 rounded border px-3 py-2">
             <Label className="text-lg font-bold">Slot Information</Label>
             {equipment.data?.slots &&
               equipment.data.slots
                 .sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime))
                 .map((data) => {
+                  console.log({ l: equipment.data.slots?.length });
+
                   return (
                     <p key={data.id}>
                       <strong>{data.slotType === 'MORNING' ? 'EARLY MORNING' : data.slotType}</strong>{' '}
@@ -441,57 +434,21 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                 <Skeleton className="h-full w-full" />
               ) : (
                 <div className="flex w-fit flex-col gap-2">
-                  <Button
-                    variant={'destructive'}
-                    size={'sm'}
-                    onClick={() => {
-                      const daySlot = equipment.data?.slots.find((slot) => slot.slotType === 'DAY');
-                      if (!daySlot) {
-                        toast({
-                          title: 'Day slot is not defined',
-                          variant: 'destructive',
-                        });
-                        return;
-                      }
-                      deleteSlot.mutate(daySlot.id);
-                    }}
-                  >
-                    Delete Day Slot
-                  </Button>
-                  <Button
-                    variant={'destructive'}
-                    size={'sm'}
-                    onClick={() => {
-                      const eveSlot = equipment.data?.slots.find((slot) => slot.slotType === 'EVENING');
-                      if (!eveSlot) {
-                        toast({
-                          title: 'Day slot is not defined',
-                          variant: 'destructive',
-                        });
-                        return;
-                      }
-                      deleteSlot.mutate(eveSlot.id);
-                    }}
-                  >
-                    Delete Evening Slot
-                  </Button>
-                  <Button
-                    variant={'destructive'}
-                    size={'sm'}
-                    onClick={() => {
-                      const nightSlot = equipment.data?.slots.find((slot) => slot.slotType === 'NIGHT');
-                      if (!nightSlot) {
-                        toast({
-                          title: 'Day slot is not defined',
-                          variant: 'destructive',
-                        });
-                        return;
-                      }
-                      deleteSlot.mutate(nightSlot.id);
-                    }}
-                  >
-                    Delete Night Slot
-                  </Button>
+                  {equipment.data?.slots
+                    .sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime))
+                    .map((sl) => (
+                      <Button
+                        key={sl.id}
+                        variant={'destructive'}
+                        size={'sm'}
+                        onClick={() => {
+                          deleteSlot.mutate(sl.id);
+                        }}
+                      >
+                        Delete {sl.slotType.toLowerCase() === 'morning' ? 'early morning' : sl.slotType.toLowerCase()}{' '}
+                        slot
+                      </Button>
+                    ))}
                 </div>
               )}
             </>
@@ -526,8 +483,43 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
           {openSlotModal === 'mod' && (
             <div className="max-w-[60%]  animate-fade-down space-y-3">
               <Label>Note: Atleast details of one slot should be modified</Label>
-              <div>
-                <Label>Early Morning Slot</Label>
+              <div className="space-y-2 rounded border px-2 py-3 duration-200 hover:bg-zinc-100">
+                <Label className="text-lg font-semibold">Early Morning Slot</Label>
+                <div className="space-y-2">
+                  <Label>Slot Duration</Label>
+                  <Select
+                    onValueChange={(val) => {
+                      setEquipmentSlots((prevSlots) => {
+                        const updatedSlots = [...prevSlots];
+
+                        updatedSlots[0] = {
+                          ...updatedSlots[0],
+                          duration: val,
+                        };
+                        return updatedSlots;
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Equipment slot" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Select Equipment slot</SelectLabel>
+                        <SelectItem value={'1'}>1 hr</SelectItem>
+                        <SelectItem value={'2'}>2 hr</SelectItem>
+                        <SelectItem value={'3'}>3 hr</SelectItem>
+                        <SelectItem value={'4'}>4 hr</SelectItem>
+                        <SelectItem value={'5'}>5 hr</SelectItem>
+                        <SelectItem value={'6'}>6 hr</SelectItem>
+                        <SelectItem value={'7'}>7 hr</SelectItem>
+                        <SelectItem value={'8'}>8 hr</SelectItem>
+                        <SelectItem value={'9'}>9 hr</SelectItem>
+                        <SelectItem value={'10'}>10 hr</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <TimePicker.RangePicker
                   format={'HH-mm'}
                   disabledTime={disabledTimeMorning}
@@ -561,8 +553,43 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   />
                 </div>
               </div>
-              <div>
-                <Label>Day Slot</Label>
+              <div className="space-y-2 rounded border px-2 py-3 duration-200 hover:bg-zinc-100">
+                <Label className="text-lg font-semibold">Day Slot</Label>
+                <div className="space-y-2">
+                  <Label>Slot Duration</Label>
+                  <Select
+                    onValueChange={(val) => {
+                      setEquipmentSlots((prevSlots) => {
+                        const updatedSlots = [...prevSlots];
+
+                        updatedSlots[1] = {
+                          ...updatedSlots[1],
+                          duration: val,
+                        };
+                        return updatedSlots;
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Equipment slot" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Select Equipment slot</SelectLabel>
+                        <SelectItem value={'1'}>1 hr</SelectItem>
+                        <SelectItem value={'2'}>2 hr</SelectItem>
+                        <SelectItem value={'3'}>3 hr</SelectItem>
+                        <SelectItem value={'4'}>4 hr</SelectItem>
+                        <SelectItem value={'5'}>5 hr</SelectItem>
+                        <SelectItem value={'6'}>6 hr</SelectItem>
+                        <SelectItem value={'7'}>7 hr</SelectItem>
+                        <SelectItem value={'8'}>8 hr</SelectItem>
+                        <SelectItem value={'9'}>9 hr</SelectItem>
+                        <SelectItem value={'10'}>10 hr</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <TimePicker.RangePicker
                   format={'HH-mm'}
                   disabledTime={disabledTimeDay}
@@ -596,8 +623,43 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   />
                 </div>
               </div>
-              <div>
-                <Label>Evening Slot</Label>
+              <div className="space-y-2 rounded border px-2 py-3 duration-200 hover:bg-zinc-100">
+                <Label className="text-lg font-semibold">Evening Slot</Label>
+                <div className="space-y-2">
+                  <Label>Slot Duration</Label>
+                  <Select
+                    onValueChange={(val) => {
+                      setEquipmentSlots((prevSlots) => {
+                        const updatedSlots = [...prevSlots];
+
+                        updatedSlots[2] = {
+                          ...updatedSlots[2],
+                          duration: val,
+                        };
+                        return updatedSlots;
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Equipment slot" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Select Equipment slot</SelectLabel>
+                        <SelectItem value={'1'}>1 hr</SelectItem>
+                        <SelectItem value={'2'}>2 hr</SelectItem>
+                        <SelectItem value={'3'}>3 hr</SelectItem>
+                        <SelectItem value={'4'}>4 hr</SelectItem>
+                        <SelectItem value={'5'}>5 hr</SelectItem>
+                        <SelectItem value={'6'}>6 hr</SelectItem>
+                        <SelectItem value={'7'}>7 hr</SelectItem>
+                        <SelectItem value={'8'}>8 hr</SelectItem>
+                        <SelectItem value={'9'}>9 hr</SelectItem>
+                        <SelectItem value={'10'}>10 hr</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <TimePicker.RangePicker
                   disabledTime={disabledTimeEvening}
                   format={'HH:mm'}
@@ -631,8 +693,43 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   />
                 </div>
               </div>
-              <div>
-                <Label>Night Slot</Label>
+              <div className="space-y-2 rounded border px-2 py-3 duration-200 hover:bg-zinc-100">
+                <Label className="text-lg font-semibold">Night Slot</Label>
+                <div className="space-y-2">
+                  <Label>Slot Duration</Label>
+                  <Select
+                    onValueChange={(val) => {
+                      setEquipmentSlots((prevSlots) => {
+                        const updatedSlots = [...prevSlots];
+
+                        updatedSlots[3] = {
+                          ...updatedSlots[3],
+                          duration: val,
+                        };
+                        return updatedSlots;
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Equipment slot" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Select Equipment slot</SelectLabel>
+                        <SelectItem value={'1'}>1 hr</SelectItem>
+                        <SelectItem value={'2'}>2 hr</SelectItem>
+                        <SelectItem value={'3'}>3 hr</SelectItem>
+                        <SelectItem value={'4'}>4 hr</SelectItem>
+                        <SelectItem value={'5'}>5 hr</SelectItem>
+                        <SelectItem value={'6'}>6 hr</SelectItem>
+                        <SelectItem value={'7'}>7 hr</SelectItem>
+                        <SelectItem value={'8'}>8 hr</SelectItem>
+                        <SelectItem value={'9'}>9 hr</SelectItem>
+                        <SelectItem value={'10'}>10 hr</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <TimePicker.RangePicker
                   disabledTime={disabledTimeNight}
                   format={'HH-mm'}

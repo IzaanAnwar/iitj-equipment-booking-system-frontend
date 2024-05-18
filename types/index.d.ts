@@ -4,7 +4,8 @@ export type Slot = {
   id: string;
   equipmentId: string;
   slotCost: number;
-  slotType: 'MORNING'|'DAY' | 'EVENING' | 'NIGHT';
+  slotDuration: number;
+  slotType: 'MORNING' | 'DAY' | 'EVENING' | 'NIGHT';
 };
 
 export type Department = {
