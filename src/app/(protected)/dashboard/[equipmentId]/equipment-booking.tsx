@@ -159,15 +159,16 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       const slotStart = new Date(event.slotTimeStart).getHours();
       const slotEnd = new Date(event.slotTimeEnd).getHours();
 
-      if (morningSlotStart && endmorningSlot && slotStart <= morningSlotStart?.[0] && slotEnd <= endmorningSlot?.[0]) {
+      if (morningSlotStart && endmorningSlot && slotStart >= morningSlotStart?.[0] && slotEnd <= endmorningSlot?.[0]) {
         return event;
       }
     });
     const dEvent = useGetEvents.data?.filter((event) => {
       const slotStart = new Date(event.slotTimeStart).getHours();
       const slotEnd = new Date(event.slotTimeEnd).getHours();
+      console.log({ slotStart, slotEnd, day: daySlotStart, enddaySlot });
 
-      if (daySlotStart && enddaySlot && slotStart <= daySlotStart?.[0] && slotEnd <= enddaySlot?.[0]) {
+      if (daySlotStart && enddaySlot && slotStart >= daySlotStart?.[0] && slotEnd <= enddaySlot?.[0]) {
         return event;
       }
     });
@@ -175,7 +176,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       const slotStart = new Date(event.slotTimeStart).getHours();
       const slotEnd = new Date(event.slotTimeEnd).getHours();
 
-      if (eveSlotStart && endeveSlot && slotStart <= eveSlotStart?.[0] && slotEnd <= endeveSlot?.[0]) {
+      if (eveSlotStart && endeveSlot && slotStart >= eveSlotStart?.[0] && slotEnd <= endeveSlot?.[0]) {
         return event;
       }
     });
@@ -183,7 +184,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
       const slotStart = new Date(event.slotTimeStart).getHours();
       const slotEnd = new Date(event.slotTimeEnd).getHours();
 
-      if (nightSlotStart && endnightSlot && slotStart <= nightSlotStart?.[0] && slotEnd <= endnightSlot?.[0]) {
+      if (nightSlotStart && endnightSlot && slotStart >= nightSlotStart?.[0] && slotEnd <= endnightSlot?.[0]) {
         return event;
       }
     });
@@ -581,6 +582,8 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     setToasted(true);
   }
 
+  console.log({ morningEvents, dayEvents });
+
   return (
     <>
       {useGetAccountDetails.isPending ? (
@@ -808,7 +811,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
                         </p>
                       </CardDescription>
                       <div className="space-y-2 pt-4">
-                        <Label>Remarks</Label>
+                        <Label>Remarks / Booking For</Label>
                         <Textarea placeholder="remark" value={remarks} onChange={(e) => setRemarks(e.target.value)} />
                       </div>
                     </CardContent>

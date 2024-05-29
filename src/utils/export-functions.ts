@@ -16,7 +16,7 @@ const generateExcel = (data: IReport[]) => {
       To: moment(report.slotTimeEnd).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
       'Booked At': moment(report.bookedAt!).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
       Cost: report.cost,
-      Remark: report.remark,
+      'Booked For': report.remark,
       Hours: report.slotDuration,
     };
   });
@@ -32,7 +32,9 @@ const generatePDF = (data: IReport[]) => {
   doc.setFontSize(18);
   doc.text('Equipment Booking Reports', 10, 10);
 
-  const headers = [['Equipment', 'Booked By', 'Booked At', 'Cost', 'Slot Start', 'Slot End', 'Booking Status']];
+  const headers = [
+    ['Equipment', 'Booked By', 'Booked At', 'Cost', 'Slot Start', 'Slot End', 'Booked For', 'Booking Status'],
+  ];
   const formattedData = data.map((report) => [
     report.equipment.name,
     report.user.name,
@@ -40,6 +42,7 @@ const generatePDF = (data: IReport[]) => {
     report.cost.toString(), // Convert cost to string
     moment(report.slotTimeStart).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
     moment(report.slotTimeEnd).tz('Asia/Kolkata').format('YY:MM:DD:HH:mm'),
+    report.remark,
     report.status,
   ]);
   doc.autoTable({

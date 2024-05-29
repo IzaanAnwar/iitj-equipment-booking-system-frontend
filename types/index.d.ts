@@ -103,6 +103,7 @@ export interface IEvent {
   slotTimeEnd: Date;
   bookedAt: Date | null;
   start: unknown;
+  slotType: 'MORNING' | 'DAY' | 'EVENING' | 'NIGHT';
   end: unknown;
   equipment: {
     slotDuration: number;

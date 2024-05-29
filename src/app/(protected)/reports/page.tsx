@@ -18,7 +18,7 @@ export default async function ReportsPage() {
     );
   }
   return (
-    <main className="space-y-4 px-2 py-12 md:px-10 lg:px-20">
+    <main className="space-y-4 px-2 py-12 md:px-6 lg:px-12">
       <h5 className="text-xl font-bold">Reports</h5>
       {user.role === 'admin' ? <SearchAndSelectEquipment user={user} /> : <SearchAndSelectStudent user={user} />}
     </main>

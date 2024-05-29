@@ -34,6 +34,7 @@ const slotSchema = z.object({
   slotDuration: z.number().optional(),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
+  maxBookings: z.number().nonnegative().int(),
 });
 
 const equipmentFormSchema = z.object({
@@ -74,6 +75,11 @@ export function EquipmentForm() {
   const [morningSlotCost, setMorningSlotCost] = useState<number>();
   const [eveningSlotCost, setEveningSlotCost] = useState<number>();
   const [nightSlotCost, setNightSlotCost] = useState<number>();
+
+  const [dayMaxBookings, setDayMaxBookings] = useState<number>();
+  const [morningMaxBookings, setMorningMaxBookings] = useState<number>();
+  const [eveningMaxBookings, setEveningMaxBookings] = useState<number>();
+  const [nightMaxBookings, setNightMaxBookings] = useState<number>();
   // const [daySlotDuration,setDaySlotDuration]
 
   const form = useForm<EquipmentFormValues>({
@@ -129,17 +135,23 @@ export function EquipmentForm() {
         startTime: string;
         endTime: string;
         duration: number;
+        maxBookings: number;
       }[] = [];
       for (const category of equipmentSlots) {
         let cost: number | undefined = 0;
+        let maxBookings: number | undefined = 1;
         if (category.type === 'MORNING') {
           cost = morningSlotCost;
+          maxBookings = morningMaxBookings;
         } else if (category.type === 'DAY') {
           cost = daySlotCost;
+          maxBookings = dayMaxBookings;
         } else if (category.type === 'EVENING') {
           cost = eveningSlotCost;
+          maxBookings = eveningMaxBookings;
         } else if (category.type === 'NIGHT') {
           cost = nightSlotCost;
+          maxBookings = nightMaxBookings;
         }
         if (category && category?.type) {
           equimentSlotCategories.push({
@@ -148,6 +160,7 @@ export function EquipmentForm() {
             duration: parseInt(category.duration),
             startTime: category.startTime!,
             endTime: category.endTime!,
+            maxBookings: maxBookings!,
           });
         }
       }
@@ -257,7 +270,7 @@ export function EquipmentForm() {
     }
     let isErr: boolean = false;
     equipmentSlots.forEach((sl) => {
-      if (!sl.endTime || !sl.startTime || !sl.type || !sl.duration) {
+      if (sl && (!sl.endTime || !sl.startTime || !sl.type || !sl.duration)) {
         isErr = true;
       }
     });
@@ -372,7 +385,7 @@ export function EquipmentForm() {
               <FormControl>
                 <>
                   <div className="space-y-3 rounded border px-2 py-4">
-                    {showMorningPicker && <Label className="block w-full">Early Morning Slot Slot</Label>}
+                    {showMorningPicker && <Label className="block w-full">Early Morning Slot</Label>}
 
                     <div className="space-y-2">
                       {showMorningPicker && (
@@ -458,13 +471,20 @@ export function EquipmentForm() {
                         )}
                       </div>
                       {showMorningPicker && (
-                        <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                        <div className="block w-full animate-fade-down space-y-3 pb-6 pt-2 animate-duration-200">
                           <Label>Usage Charge Per Slot</Label>
                           <Input
                             type="number"
                             placeholder="eg: 1"
                             value={morningSlotCost}
                             onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
+                          />
+                          <Label>Max Bookings</Label>
+                          <Input
+                            type="number"
+                            placeholder="eg: 1"
+                            value={morningMaxBookings}
+                            onChange={(e) => setMorningMaxBookings(parseInt(e.target.value))}
                           />
                         </div>
                       )}
@@ -558,13 +578,20 @@ export function EquipmentForm() {
                         )}
                       </div>
                       {showDayPicker && (
-                        <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                        <div className="block w-full animate-fade-down space-x-3 pb-6 pt-2 animate-duration-200">
                           <Label>Usage Charge Per Slot</Label>
                           <Input
                             type="number"
                             placeholder="eg: 1"
                             value={daySlotCost}
                             onChange={(e) => setDaySlotCost(parseInt(e.target.value))}
+                          />
+                          <Label>Max Bookings</Label>
+                          <Input
+                            type="number"
+                            placeholder="eg: 1"
+                            value={dayMaxBookings}
+                            onChange={(e) => setDayMaxBookings(parseInt(e.target.value))}
                           />
                         </div>
                       )}
@@ -657,13 +684,20 @@ export function EquipmentForm() {
                         )}
                       </div>
                       {showEveningPicker && (
-                        <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                        <div className="block w-full animate-fade-down space-y-3 pb-6 pt-2 animate-duration-200">
                           <Label>Usage Charge Per Slot</Label>
                           <Input
                             type="number"
                             placeholder="eg: 1"
                             value={eveningSlotCost}
                             onChange={(e) => setEveningSlotCost(parseInt(e.target.value))}
+                          />
+                          <Label>Max Bookings</Label>
+                          <Input
+                            type="number"
+                            placeholder="eg: 1"
+                            value={eveningMaxBookings}
+                            onChange={(e) => setEveningMaxBookings(parseInt(e.target.value))}
                           />
                         </div>
                       )}
@@ -753,7 +787,7 @@ export function EquipmentForm() {
                     </div>
                   </div>
                   {showNightPicker && (
-                    <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                    <div className="block w-full animate-fade-down space-y-3 pb-6 pt-2 animate-duration-200">
                       <Label>Usage Charge Per Slot</Label>
 
                       <Input
@@ -761,6 +795,13 @@ export function EquipmentForm() {
                         placeholder="eg: 1 "
                         value={nightSlotCost}
                         onChange={(e) => setNightSlotCost(parseInt(e.target.value))}
+                      />
+                      <Label>Max Bookings</Label>
+                      <Input
+                        type="number"
+                        placeholder="eg: 1"
+                        value={nightMaxBookings}
+                        onChange={(e) => setNightMaxBookings(parseInt(e.target.value))}
                       />
                     </div>
                   )}

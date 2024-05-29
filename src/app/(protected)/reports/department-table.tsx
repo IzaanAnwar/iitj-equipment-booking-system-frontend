@@ -69,6 +69,11 @@ export function DepartmentReportList({ id, user }: { id: string; user: User }) {
       header: 'User',
     },
     {
+      accessorKey: 'remark',
+      header: 'Remark',
+    },
+
+    {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ cell }) => {
