@@ -58,25 +58,6 @@ export function EquipmentList({ user }: { user: User }) {
     },
 
     {
-      accessorKey: 'description',
-      header: () => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const isDesktop = useMediaQuery('(min-width:1000px)');
-        if (isDesktop) {
-          return <div className="text-center md:max-w-[28rem] lg:max-w-[32rem] xl:w-full ">Description</div>;
-        }
-      },
-      cell: ({ cell }) => {
-        const data = cell.getValue() as string;
-
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const isDesktop = useMediaQuery('(min-width:1000px)');
-        if (isDesktop) {
-          return <div className="text-left  md:max-w-[28rem] lg:max-w-[32rem] xl:w-full">{data}</div>;
-        }
-      },
-    },
-    {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ cell }) => {

@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 const QuillEditor = dynamic(() => import('react-quill'), { ssr: false });
+
 export function AddInformation() {
   const [readonly, setreadonly] = useState(true);
   const [value, setValue] = useState('');

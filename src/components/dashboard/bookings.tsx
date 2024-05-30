@@ -15,8 +15,7 @@ import { Maintainance } from './maintainance';
 import { useGetActiveEquipments, useGetEquipments } from '@/hooks/use-equipments';
 import { Equipment } from '../../../types';
 import moment from 'moment';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/utils/axios-instance';
+import 'react-quill/dist/quill.snow.css';
 
 export function BookingsPage() {
   const [open, setOpen] = useState(false);
@@ -92,7 +91,10 @@ function EquipmentCard({ equipment }: { equipment: Equipment }) {
     <Card className="animate-fade-down animate-duration-200">
       <CardHeader>
         <CardTitle className="text-primary">{equipment.name}</CardTitle>
-        <CardDescription>{equipment.description}</CardDescription>
+        <CardDescription
+          className="ql-editor"
+          dangerouslySetInnerHTML={{ __html: equipment.description }}
+        ></CardDescription>
         <CardDescription>
           <strong>Location</strong>: {equipment.place}
         </CardDescription>
@@ -100,7 +102,9 @@ function EquipmentCard({ equipment }: { equipment: Equipment }) {
       <CardContent>
         <CardDescription className="">
           <strong>Lab Hours</strong>
-          {equipment.slots.sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime))?.map((slot) => {
+          {equipment.slots
+            .sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime))
+            ?.map((slot) => {
               const starTime = new Date(slot.startTime)?.toLocaleTimeString('en-IN', {
                 hour: 'numeric',
                 minute: 'numeric',
@@ -117,11 +121,13 @@ function EquipmentCard({ equipment }: { equipment: Equipment }) {
 
               return (
                 <div key={slot.id} className="flex items-center justify-start gap-4">
-                  <p>{(slot.slotType === "MORNING" ? "EARLY MORNING":slot.slotType)}</p>:{' '}
+                  <p>{slot.slotType === 'MORNING' ? 'EARLY MORNING' : slot.slotType}</p>:{' '}
                   <strong>{moment.utc(slot.startTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
                   <p>to</p>
                   <strong>{moment.utc(slot.endTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
-                  <p>at <strong>₹ {slot.slotCost} </strong></p>
+                  <p>
+                    at <strong>₹ {slot.slotCost} </strong>
+                  </p>
                 </div>
               );
             })}

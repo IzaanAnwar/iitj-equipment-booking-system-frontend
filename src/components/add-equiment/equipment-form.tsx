@@ -1,4 +1,5 @@
 'use client';
+import 'react-quill/dist/quill.snow.css';
 
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,6 +28,7 @@ import { api } from '@/utils/axios-instance';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
 import { Dayjs } from 'dayjs';
+import { Editor } from '@/app/(protected)/dashboard/edit/[equipmentId]/editor';
 
 const slotSchema = z.object({
   type: z.enum(['DAY', 'EVENING', 'NIGHT']),
@@ -41,9 +43,7 @@ const equipmentFormSchema = z.object({
   name: z.string().min(2, {
     message: 'Name must be at least 2 characters.',
   }),
-  description: z.string({
-    required_error: 'Please write a description to display.',
-  }),
+
   place: z.string(),
   equipmentTime: z.array(slotSchema).optional(),
 });
@@ -53,6 +53,7 @@ type EquipmentFormValues = z.infer<typeof equipmentFormSchema>;
 export function EquipmentForm() {
   const [toasted, setToasted] = useState<boolean>(false);
   const [slots, setSlots] = useState(['DAY']);
+  const [description, setDescription] = useState<string>('');
   const [disableMorningEnd, setDisableMorningEnd] = useState<number>(0);
   const [disableDayStart, setDisableDayStart] = useState<number>(24);
   const [disableDayEnd, setDisableDayEnd] = useState<number>(0);
@@ -129,6 +130,8 @@ export function EquipmentForm() {
   const useAddEquipment = useMutation({
     mutationKey: ['add-equipment'],
     mutationFn: async (data: EquipmentFormValues) => {
+      console.log('Adding');
+
       const equimentSlotCategories: {
         type: string;
         cost: number;
@@ -138,6 +141,10 @@ export function EquipmentForm() {
         maxBookings: number;
       }[] = [];
       for (const category of equipmentSlots) {
+        if (!category) {
+          continue;
+        }
+
         let cost: number | undefined = 0;
         let maxBookings: number | undefined = 1;
         if (category.type === 'MORNING') {
@@ -167,7 +174,7 @@ export function EquipmentForm() {
 
       const res = await api.post('/equipments/add', {
         name: data.name,
-        description: data.description,
+        description: description,
         place: data.place,
         equipmentSlots: equimentSlotCategories,
       });
@@ -249,14 +256,17 @@ export function EquipmentForm() {
   );
 
   function onSubmit(data: EquipmentFormValues) {
-    console.log({ data, equipmentSlots });
-    {
-      console.log({ equipmentSlots });
-    }
     setToasted(false);
     if (!data) {
       toast({
         title: 'Missing Values',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (!description) {
+      toast({
+        title: 'Missing Description',
         variant: 'destructive',
       });
       return;
@@ -269,7 +279,9 @@ export function EquipmentForm() {
       return;
     }
     let isErr: boolean = false;
-    equipmentSlots.forEach((sl) => {
+    equipmentSlots.forEach((sl, i) => {
+      console.log({ sl, index: i });
+
       if (sl && (!sl.endTime || !sl.startTime || !sl.type || !sl.duration)) {
         isErr = true;
       }
@@ -304,7 +316,8 @@ export function EquipmentForm() {
       description: useAddEquipment.data?.message || 'Equipment Added!',
     });
     setToasted(true);
-    form.reset({ description: '', equipmentTime: [], name: '', place: '' });
+    form.reset({ equipmentTime: [], name: '', place: '' });
+    setDescription('');
   }
 
   if (!toasted && useAddEquipment.isError) {
@@ -333,20 +346,16 @@ export function EquipmentForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Write something about the equipment" className="resize-none" {...field} />
-              </FormControl>
+        <div>
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Editor state={description} setState={setDescription} />
+            </FormControl>
 
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormMessage />
+          </FormItem>
+        </div>
         <FormField
           control={form.control}
           name="place"

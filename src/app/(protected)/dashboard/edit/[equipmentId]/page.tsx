@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
+import { Editor } from './editor';
 export default function EditEquipment({ params }: { params: { equipmentId: string } }) {
   const router = useRouter();
   const [name, setName] = useState<string>('');
@@ -57,11 +58,15 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
   >([]);
   const [morningSlotCost, setMorningSlotCost] = useState<number>();
   const [daySlotCost, setDaySlotCost] = useState<number>();
-  const [slotDuration, setSlotDuration] = useState<string>();
   const [eveningSlotCost, setEveningSlotCost] = useState<number>();
   const [nightSlotCost, setNightSlotCost] = useState<number>();
   const [description, setDescription] = useState<string>('');
   const [toasted, setToasted] = useState<boolean>(false);
+
+  const [dayMaxBookings, setDayMaxBookings] = useState<number>();
+  const [morningMaxBookings, setMorningMaxBookings] = useState<number>();
+  const [eveningMaxBookings, setEveningMaxBookings] = useState<number>();
+  const [nightMaxBookings, setNightMaxBookings] = useState<number>();
 
   const equipment = useQuery({
     queryKey: ['get-equipment'],
@@ -148,17 +153,23 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
           startTime: string;
           endTime: string;
           duration: number;
+          maxBookings: number;
         }[] = [];
         for (const category of equipmentSlots) {
           let cost: number | undefined = 0;
+          let maxBookings = 1;
           if (category?.type === 'MORNING') {
             cost = morningSlotCost;
+            maxBookings = morningMaxBookings || 1;
           } else if (category?.type === 'DAY') {
             cost = daySlotCost;
+            maxBookings = dayMaxBookings || 1;
           } else if (category?.type === 'EVENING') {
             cost = eveningSlotCost;
+            maxBookings = eveningMaxBookings || 1;
           } else if (category?.type === 'NIGHT') {
             cost = nightSlotCost;
+            maxBookings = nightMaxBookings || 1;
           }
           if (category && category?.type) {
             equimentSlotCategories.push({
@@ -167,6 +178,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
               duration: parseInt(category.duration),
               startTime: category.startTime!,
               endTime: category.endTime!,
+              maxBookings,
             });
           }
         }
@@ -314,9 +326,10 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                 <p>
                   Place <strong>{place}</strong>
                 </p>
-                <p>
-                  Description <strong>{description}</strong>
-                </p>
+                <p
+                  className="ql-editor max-h-[50vh] overflow-y-scroll"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                ></p>
               </div>
 
               <div>
@@ -381,7 +394,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
           </div>
           <div className="space-y-2">
             <Label>Description</Label>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Editor state={description} setState={setDescription} />
           </div>
 
           <div className="space-y-2 rounded border px-3 py-2">
@@ -393,15 +406,27 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   console.log({ l: equipment.data.slots?.length });
 
                   return (
-                    <p key={data.id}>
-                      <strong>{data.slotType === 'MORNING' ? 'EARLY MORNING' : data.slotType}</strong>{' '}
-                      {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)} at {data?.slotCost} credit
-                    </p>
+                    <div key={data.id} className="space-y-2 rounded bg-zinc-100 p-1">
+                      <h3 className="text-lg font-bold">
+                        {data.slotType === 'MORNING' ? 'EARLY MORNING' : data.slotType}
+                      </h3>
+                      <div>
+                        <p>
+                          <strong>Timing</strong> {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)} at{' '}
+                        </p>
+                        <p>
+                          <strong>Credit</strong>: {data?.slotCost}
+                        </p>
+                        <p>
+                          <strong>Slot Duration</strong>: {data?.slotDuration} H
+                        </p>
+                        <p>
+                          <strong>Max Allowed Booking</strong> {data.maxBookings}
+                        </p>
+                      </div>
+                    </div>
                   );
                 })}
-            <p>
-              Slot Duration <strong>{equipment.data?.slotDuration} Hr</strong>
-            </p>
           </div>
           <div className="flex items-center justify-start gap-4">
             <Button
@@ -540,7 +565,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                <div className="block w-full animate-fade-down space-y-3 pb-6 pt-2 animate-duration-200">
                   <Label>Usage Charge Per Slot</Label>
 
                   <Input
@@ -548,6 +573,14 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     placeholder="eg: 1 "
                     value={morningSlotCost}
                     onChange={(e) => setMorningSlotCost(parseInt(e.target.value))}
+                  />
+
+                  <Label>Max Bookings</Label>
+                  <Input
+                    type="number"
+                    placeholder="eg: 1"
+                    value={morningMaxBookings}
+                    onChange={(e) => setMorningMaxBookings(parseInt(e.target.value))}
                   />
                 </div>
               </div>
@@ -610,7 +643,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                <div className="block w-full animate-fade-down space-y-3 pb-6 pt-2 animate-duration-200">
                   <Label>Usage Charge Per Slot</Label>
 
                   <Input
@@ -618,6 +651,13 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     placeholder="eg: 1 "
                     value={daySlotCost}
                     onChange={(e) => setDaySlotCost(parseInt(e.target.value))}
+                  />
+                  <Label>Max Bookings</Label>
+                  <Input
+                    type="number"
+                    placeholder="eg: 1"
+                    value={dayMaxBookings}
+                    onChange={(e) => setDayMaxBookings(parseInt(e.target.value))}
                   />
                 </div>
               </div>
@@ -680,7 +720,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                <div className="block w-full animate-fade-down space-y-3 pb-6 pt-2 animate-duration-200">
                   <Label>Usage Charge Per Slot</Label>
 
                   <Input
@@ -688,6 +728,14 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     placeholder="eg: 1 "
                     value={eveningSlotCost}
                     onChange={(e) => setEveningSlotCost(parseInt(e.target.value))}
+                  />
+
+                  <Label>Max Bookings</Label>
+                  <Input
+                    type="number"
+                    placeholder="eg: 1"
+                    value={eveningMaxBookings}
+                    onChange={(e) => setEveningMaxBookings(parseInt(e.target.value))}
                   />
                 </div>
               </div>
@@ -746,7 +794,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                   }}
                   className="btn-style flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <div className="block w-full animate-fade-down pb-6 pt-2 animate-duration-200">
+                <div className="block w-full animate-fade-down space-y-3 pb-6 pt-2 animate-duration-200">
                   <Label>Usage Charge Per Slot</Label>
 
                   <Input
@@ -754,6 +802,13 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     placeholder="eg: 1 "
                     value={nightSlotCost}
                     onChange={(e) => setNightSlotCost(parseInt(e.target.value))}
+                  />
+                  <Label>Max Bookings</Label>
+                  <Input
+                    type="number"
+                    placeholder="eg: 1"
+                    value={nightMaxBookings}
+                    onChange={(e) => setNightMaxBookings(parseInt(e.target.value))}
                   />
                 </div>
               </div>

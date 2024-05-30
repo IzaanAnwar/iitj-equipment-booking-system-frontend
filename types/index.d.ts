@@ -4,6 +4,7 @@ export type Slot = {
   id: string;
   equipmentId: string;
   slotCost: number;
+  maxBookings: number;
   slotDuration: number;
   slotType: 'MORNING' | 'DAY' | 'EVENING' | 'NIGHT';
 };

@@ -115,3 +115,7 @@
   width: 100%;
 }
 /*  */
+
+.ql-container .ql-editor p {
+  min-height: 16vh;
+}

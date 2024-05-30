@@ -79,6 +79,10 @@ export function SupervisorReportList({ id, user }: { id: string; user: User }) {
       },
     },
     {
+      accessorKey: 'remark',
+      header: 'Booked For',
+    },
+    {
       accessorKey: 'slotTimeStart',
       header: ({ column }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks

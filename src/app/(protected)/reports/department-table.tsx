@@ -70,7 +70,7 @@ export function DepartmentReportList({ id, user }: { id: string; user: User }) {
     },
     {
       accessorKey: 'remark',
-      header: 'Remark',
+      header: 'Booked For',
     },
 
     {

@@ -64,6 +64,10 @@ export const columns: ColumnDef<IReport>[] = [
     },
   },
   {
+    accessorKey: 'remark',
+    header: 'Booked For',
+  },
+  {
     accessorKey: 'slotTimeStart',
     header: () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
