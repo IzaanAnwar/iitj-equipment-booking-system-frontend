@@ -412,7 +412,7 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                       </h3>
                       <div>
                         <p>
-                          <strong>Timing</strong> {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)} at{' '}
+                          <strong>Timing</strong> {data?.startTime.slice(0, 5)} - {data?.endTime.slice(0, 5)}
                         </p>
                         <p>
                           <strong>Credit</strong>: {data?.slotCost}
