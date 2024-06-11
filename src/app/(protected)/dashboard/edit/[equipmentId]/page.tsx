@@ -403,8 +403,6 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
               equipment.data.slots
                 .sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime))
                 .map((data) => {
-                  console.log({ l: equipment.data.slots?.length });
-
                   return (
                     <div key={data.id} className="space-y-2 rounded bg-zinc-100 p-1">
                       <h3 className="text-lg font-bold">
@@ -580,7 +578,11 @@ export default function EditEquipment({ params }: { params: { equipmentId: strin
                     type="number"
                     placeholder="eg: 1"
                     value={morningMaxBookings}
-                    onChange={(e) => setMorningMaxBookings(parseInt(e.target.value))}
+                    onChange={(e) => {
+                      console.log({ e: e.target.value });
+
+                      setMorningMaxBookings(parseInt(e.target.value));
+                    }}
                   />
                 </div>
               </div>

@@ -100,7 +100,7 @@ function EquipmentCard({ equipment }: { equipment: Equipment }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <CardDescription className="">
+        <CardDescription className="space-y-3">
           <strong>Lab Hours</strong>
           {equipment.slots
             .sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime))
@@ -120,14 +120,33 @@ function EquipmentCard({ equipment }: { equipment: Equipment }) {
               console.log({ typeof: typeof slot.startTime });
 
               return (
-                <div key={slot.id} className="flex items-center justify-start gap-4">
-                  <p>{slot.slotType === 'MORNING' ? 'EARLY MORNING' : slot.slotType}</p>:{' '}
-                  <strong>{moment.utc(slot.startTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
-                  <p>to</p>
-                  <strong>{moment.utc(slot.endTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
-                  <p>
-                    at <strong>₹ {slot.slotCost} </strong>
-                  </p>
+                // <div key={slot.id} className="flex items-center justify-start gap-4">
+                //   <p>{slot.slotType === 'MORNING' ? 'EARLY MORNING' : slot.slotType}</p>:{' '}
+                //   <strong>{moment.utc(slot.startTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
+                //   <p>to</p>
+                //   <strong>{moment.utc(slot.endTime, 'HH:mm:ss.SSSSSS').format('HH:mm')}</strong>
+                //   <p>
+                //     at <strong>₹ {slot.slotCost} </strong>
+                //   </p>
+                // </div>
+                <div key={slot.id} className="space-y-1 rounded  p-1">
+                  <h3 className="text-lg font-bold text-black">
+                    {slot.slotType === 'MORNING' ? 'EARLY MORNING' : slot.slotType}
+                  </h3>
+                  <div>
+                    <p>
+                      <strong>Timing</strong> {slot?.startTime.slice(0, 5)} - {slot?.endTime.slice(0, 5)}
+                    </p>
+                    <p>
+                      <strong>Credit</strong>: ₹{slot?.slotCost}
+                    </p>
+                    <p>
+                      <strong>Slot Duration</strong>: {slot?.slotDuration} H
+                    </p>
+                    <p>
+                      <strong>Max Allowed Booking</strong> {slot.maxBookings}
+                    </p>
+                  </div>
                 </div>
               );
             })}
