@@ -607,7 +607,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
                 size={'sm'}
                 onClick={() => setToggle('morning')}
               >
-                Earky Morning
+                Early Morning
               </Button>
             )}
             {daySlot && (
