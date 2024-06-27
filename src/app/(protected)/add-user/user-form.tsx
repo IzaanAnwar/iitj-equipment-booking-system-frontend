@@ -67,7 +67,7 @@ export function UserForm({ user }: { user: User }) {
       const res = await api.post('/users/students/add', {
         name: data.name,
         email: data.email,
-        roll: parseInt(data.uin!),
+        roll: data.uin,
         departmentId: data.department,
       });
 
@@ -297,7 +297,7 @@ export function UserForm({ user }: { user: User }) {
                 <FormItem className="animate-fade-down animate-duration-200">
                   <FormLabel>{usertype === 'user' ? 'Roll Number' : 'Department Id'}</FormLabel>
                   <FormControl>
-                    <Input type={usertype === 'user' ? 'number' : 'text'} {...field} />
+                    <Input type="text" {...field} />
                   </FormControl>
                   <FormDescription>Mention {usertype === 'user' ? 'Roll Number' : 'Department Id'}</FormDescription>
                   <FormMessage />

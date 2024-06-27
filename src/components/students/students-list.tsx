@@ -186,7 +186,7 @@ export function StudentsList({ user }: { user: User }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your account and remove your data from our
+                This action cannot be undone. This will permanently delete this account and remove thier data from our
                 servers.
               </AlertDialogDescription>
             </AlertDialogHeader>

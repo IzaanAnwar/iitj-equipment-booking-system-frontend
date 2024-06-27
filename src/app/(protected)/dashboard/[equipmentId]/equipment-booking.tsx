@@ -318,6 +318,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     [equipment.data, useGetEvents.data, user?.role, morningSlot],
   );
   ///
+  console.log({ selectedSlot });
 
   const hanldeSelectDaySlot = useCallback(
     (slotInfo: SlotInfo) => {
