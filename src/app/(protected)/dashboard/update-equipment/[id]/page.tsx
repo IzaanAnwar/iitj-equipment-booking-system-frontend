@@ -81,7 +81,9 @@ export default function UpdateEquipemnt({ params }: { params: { id: string } }) 
       <Card>
         <CardHeader>
           <CardTitle>{useGetEquipmentDetails.data?.name}</CardTitle>
-          <CardDescription>{useGetEquipmentDetails.data?.description}</CardDescription>
+          <CardDescription
+            dangerouslySetInnerHTML={{ __html: useGetEquipmentDetails.data?.description || '<h1>No Description</h1>' }}
+          ></CardDescription>
           <CardDescription>
             <strong>Location </strong>: {useGetEquipmentDetails.data?.place}
           </CardDescription>
