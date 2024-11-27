@@ -64,7 +64,7 @@ export function Navbar({ user }: { user: User | null }) {
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between border-b-2 border-gray-300  bg-primary px-2 py-2 text-primary-foreground md:px-16">
       <div className="flex cursor-pointer items-center justify-start gap-4" onClick={() => router.push('/dashboard')}>
-        <Image src="/logo1.gif" alt="crdsi logo" width={48} height={48} />
+        <Image src="/crdsi_logo.png" alt="crdsi logo" width={48} height={48} />
         <p className="text-xl font-semibold">CRDSI</p>
       </div>
       <div className="flex items-center justify-end gap-2">

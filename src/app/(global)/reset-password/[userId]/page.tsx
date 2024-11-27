@@ -138,7 +138,7 @@ export default function ResetPasswordPage({ params }: { params: { userId: string
 function Header() {
   return (
     <div className="flex items-center justify-center gap-12 pt-12 text-white">
-      <Image src={'/logo1.gif'} alt="crdsi logo" width={100} height={100} />
+      <Image src={'/crdsi_logo.png'} alt="crdsi logo" width={100} height={100} />
       <div className="flex items-center justify-center gap-2 text-4xl font-semibold">
         <h3 className="font-bold">CRDSI</h3>
         <p>Equipment Booking System</p>
