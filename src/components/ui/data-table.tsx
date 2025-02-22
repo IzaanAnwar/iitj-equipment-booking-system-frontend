@@ -77,7 +77,7 @@ export function DataTable<TData, TValue>({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto flex items-center justify-start gap-2 " size={'sm'}>
+            <Button variant="outline" className="mb-2 ml-auto flex items-center justify-start gap-2 " size={'sm'}>
               <Settings2Icon size={20} /> <p>View</p>
             </Button>
           </DropdownMenuTrigger>

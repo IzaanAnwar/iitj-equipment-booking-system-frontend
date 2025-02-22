@@ -291,7 +291,7 @@ export function SearchAndSelectStudent({ user }: { user: User }) {
           </PopoverTrigger>
           <PopoverContent className="w-[96vw] p-0 text-base md:w-[72vw] lg:w-[67vw]">
             <Command>
-              <CommandInput placeholder="Search Equipment..." />
+              <CommandInput placeholder="Search Student..." />
               <CommandEmpty>No Student found.</CommandEmpty>
               <CommandGroup>
                 <CommandList>

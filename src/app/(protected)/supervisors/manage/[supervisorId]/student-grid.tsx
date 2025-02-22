@@ -24,7 +24,7 @@ export function StudentGrid({ user, supervisorId }: { user: User; supervisorId: 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [selectedSupervisor, setSelectedSupervisor] = useState<Supervisor>();
-  const [amount, setAmount] = useState<number>();
+  const [amount, setAmount] = useState<number>(0);
   const [selectedStudent, setSelectedStudent] = useState<Student>();
   const allSupervisors = useGetAllSupervisors();
   const useTransferStuden = useMutation({
@@ -46,6 +46,13 @@ export function StudentGrid({ user, supervisorId }: { user: User; supervisorId: 
   const useAllotPoints = useMutation({
     mutationKey: ['allot-points'],
     mutationFn: async () => {
+      if (amount === 0) {
+        toast({
+          title: 'Amount is set to Rs 0',
+          variant: 'destructive',
+        });
+        throw new Error('Amount is set to 0');
+      }
       const res = await api.post('users/allot-points', {
         userId: supervisorId,
         amount: amount,
@@ -87,6 +94,7 @@ export function StudentGrid({ user, supervisorId }: { user: User; supervisorId: 
     });
 
     setToasted(true);
+    setAmount(0);
     students.refetch();
   }
 

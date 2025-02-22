@@ -1,7 +1,10 @@
 import { getSession } from '@/actions/get-session';
 import { SearchAndSelectEquipment, SearchAndSelectStudent } from './category-search';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Unauthorized } from '@/components/common/unauthorised';
 import { redirect } from 'next/navigation';
+import { FinanceReportList } from './financial-reports';
 
 export default async function ReportsPage() {
   const user = await getSession();
@@ -19,8 +22,18 @@ export default async function ReportsPage() {
   }
   return (
     <main className="space-y-4 px-2 py-12 md:px-6 lg:px-12">
-      <h5 className="text-xl font-bold">Reports</h5>
-      {user.role === 'admin' ? <SearchAndSelectEquipment user={user} /> : <SearchAndSelectStudent user={user} />}
+      <Tabs defaultValue="bookings" className="w-full">
+        <TabsList>
+          <TabsTrigger value="bookings">Bookings Report</TabsTrigger>
+          <TabsTrigger value="finances">Financial Reports</TabsTrigger>
+        </TabsList>
+        <TabsContent value="bookings">
+          {user.role === 'admin' ? <SearchAndSelectEquipment user={user} /> : <SearchAndSelectStudent user={user} />}
+        </TabsContent>
+        <TabsContent value="finances">
+          <FinanceReportList user={user} />
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }

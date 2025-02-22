@@ -166,3 +166,36 @@ export interface IAccountDetails {
   supervisor: User | null;
   token: number;
 }
+
+export interface FinanceReport {
+  message: string;
+  id: string;
+  supervisorId: string | null;
+  departmentId: string | null;
+  equipmentId: string | null;
+  amount: number;
+  actionType: 'PURCHASE' | 'REFUND' | 'CREDIT_ALLOTMENT';
+  studentId: string | null;
+  actionById: string;
+  supervisor: {
+    id: string;
+    name: string;
+  } | null;
+  department: {
+    id: string;
+    name: string;
+  } | null;
+  equipment: {
+    id: string;
+    name: string;
+  } | null;
+  student: {
+    id: string;
+    name: string;
+  } | null;
+  actionBy: {
+    id: string;
+    name: string;
+  };
+  createdAt: Date | null;
+}
