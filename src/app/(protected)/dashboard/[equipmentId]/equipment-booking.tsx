@@ -262,7 +262,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     (slotInfo: SlotInfo) => {
       const startTime = moment(slotInfo.start);
 
-      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
+      const isWeekend = startTime.weekday() === 0;
 
       const bookingExists = useGetEvents.data?.find((item) => {
         const startSlot = item.start;
@@ -324,7 +324,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     (slotInfo: SlotInfo) => {
       const startTime = moment(slotInfo.start);
 
-      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
+      const isWeekend = startTime.weekday() === 0;
 
       const bookingExists = useGetEvents.data?.find((item) => {
         const startSlot = item.start;
@@ -385,7 +385,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     (slotInfo: SlotInfo) => {
       const startTime = moment(slotInfo.start);
 
-      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
+      const isWeekend = startTime.weekday() === 0;
 
       const bookingExists = useGetEvents.data?.find((item) => {
         const startSlot = item.start;
@@ -447,7 +447,7 @@ export function BookEquipment({ equipmentId, user }: { equipmentId: string; user
     (slotInfo: SlotInfo) => {
       const startTime = moment(slotInfo.start);
 
-      const isWeekend = startTime.weekday() === 0 || startTime.weekday() === 6;
+      const isWeekend = startTime.weekday() === 0;
 
       const bookingExists = useGetEvents.data?.find((item) => {
         const startSlot = item.start;
